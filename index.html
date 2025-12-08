@@ -258,6 +258,45 @@
             scopes: 'https://www.googleapis.com/auth/spreadsheets'
         };
 
+        // Validate configuration
+        function validateConfig() {
+            const placeholders = ['YOUR_GOOGLE_CLIENT_ID', 'YOUR_GOOGLE_API_KEY', 'YOUR_SPREADSHEET_ID'];
+            const invalidConfigs = placeholders.filter(p => 
+                Object.values(CONFIG).some(v => v.includes(p))
+            );
+            
+            if (invalidConfigs.length > 0) {
+                const configSection = document.querySelector('.container');
+                configSection.innerHTML = `
+                    <h1>⚙️ Configuration Required</h1>
+                    <div style="padding: 20px; background: #fff3cd; border: 1px solid #ffc107; border-radius: 5px; margin: 20px 0;">
+                        <p style="color: #856404; margin-bottom: 10px;"><strong>Please configure the application:</strong></p>
+                        <ol style="color: #856404; text-align: left; margin-left: 20px;">
+                            <li>Open <code>index.html</code> in a text editor</li>
+                            <li>Find the <code>CONFIG</code> object (around line 253)</li>
+                            <li>Replace the placeholder values with your actual:
+                                <ul>
+                                    <li>Google Client ID</li>
+                                    <li>Google API Key</li>
+                                    <li>Google Spreadsheet ID</li>
+                                </ul>
+                            </li>
+                            <li>Save the file and reload this page</li>
+                        </ol>
+                        <p style="color: #856404; margin-top: 10px;">See the <strong>README.md</strong> for detailed setup instructions.</p>
+                    </div>
+                `;
+                return false;
+            }
+            return true;
+        }
+
+        // Check configuration on page load
+        if (!validateConfig()) {
+            // Stop execution if configuration is invalid
+            throw new Error('Configuration required');
+        }
+
         let tokenClient;
         let gapiInited = false;
         let gisInited = false;
@@ -308,11 +347,7 @@
                 showExpenseSection();
             };
 
-            if (accessToken === null) {
-                tokenClient.requestAccessToken({ prompt: 'consent' });
-            } else {
-                tokenClient.requestAccessToken({ prompt: '' });
-            }
+            tokenClient.requestAccessToken({ prompt: accessToken === null ? 'consent' : '' });
         });
 
         // Get user information
@@ -381,7 +416,8 @@
 
         // Add expense to Google Sheet
         async function addExpenseToSheet(amount, item) {
-            const timestamp = new Date().toISOString();
+            const now = new Date();
+            const timestamp = now.toLocaleString();
             const values = [
                 [timestamp, currentUser.name, currentUser.email, amount, item]
             ];

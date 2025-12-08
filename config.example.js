@@ -1,5 +1,11 @@
-// Copy this file to config.js and fill in your actual values
-// Then update index.html to use: <script src="config.js"></script>
+// OPTION 1 (Recommended): Edit index.html directly
+// Open index.html, find the CONFIG object, and replace the placeholder values
+
+// OPTION 2: Use this external config file
+// 1. Copy this file: cp config.example.js config.js
+// 2. Fill in your actual values below
+// 3. In index.html, remove or comment out the CONFIG object
+// 4. Add this line before the closing </body> tag: <script src="config.js"></script>
 
 const CONFIG = {
     // Your Google OAuth 2.0 Client ID
