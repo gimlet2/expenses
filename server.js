@@ -4,6 +4,7 @@ const session = require('express-session');
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const { google } = require('googleapis');
+const rateLimit = require('express-rate-limit');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -24,14 +25,32 @@ if (!process.env.SPREADSHEET_ID) {
   process.exit(1);
 }
 
+// Rate limiting
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
+  message: 'Too many requests from this IP, please try again later.'
+});
+
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // limit each IP to 5 auth attempts per windowMs
+  message: 'Too many authentication attempts, please try again later.'
+});
+
 // Middleware
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+app.use(limiter);
 app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
-  cookie: { secure: process.env.NODE_ENV === 'production' }
+  cookie: { 
+    secure: process.env.NODE_ENV === 'production',
+    httpOnly: true,
+    sameSite: 'lax'
+  }
 }));
 
 app.use(passport.initialize());
@@ -102,12 +121,14 @@ app.get('/', (req, res) => {
 });
 
 app.get('/auth/google',
+  authLimiter,
   passport.authenticate('google', { 
     scope: ['profile', 'email', 'https://www.googleapis.com/auth/spreadsheets'] 
   })
 );
 
 app.get('/auth/google/callback',
+  authLimiter,
   passport.authenticate('google', { failureRedirect: '/' }),
   (req, res) => {
     res.redirect('/expenses');
