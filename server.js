@@ -8,14 +8,30 @@ const { google } = require('googleapis');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Validate required environment variables
+if (!process.env.SESSION_SECRET) {
+  console.error('ERROR: SESSION_SECRET is not set in environment variables');
+  process.exit(1);
+}
+
+if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
+  console.error('ERROR: Google OAuth credentials are not set in environment variables');
+  process.exit(1);
+}
+
+if (!process.env.SPREADSHEET_ID) {
+  console.error('ERROR: SPREADSHEET_ID is not set in environment variables');
+  process.exit(1);
+}
+
 // Middleware
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'your-secret-key',
+  secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
-  cookie: { secure: false } // Set to true if using HTTPS
+  cookie: { secure: process.env.NODE_ENV === 'production' }
 }));
 
 app.use(passport.initialize());

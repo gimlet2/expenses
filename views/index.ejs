@@ -61,6 +61,16 @@
             height: 20px;
             margin-right: 10px;
         }
+        .expense-btn {
+            display: block;
+            margin: 10px 0;
+        }
+        .logout-action-btn {
+            display: block;
+            background: #f44336;
+            color: white;
+            border: none;
+        }
     </style>
 </head>
 <body>
@@ -80,8 +90,8 @@
             </a>
         <% } else { %>
             <p>Welcome, <%= user.displayName %>!</p>
-            <a href="/expenses" class="google-btn" style="display: block; margin: 10px 0;">Go to Expenses</a>
-            <a href="/logout" class="google-btn" style="display: block; background: #f44336; color: white; border: none;">Logout</a>
+            <a href="/expenses" class="google-btn expense-btn">Go to Expenses</a>
+            <a href="/logout" class="google-btn logout-action-btn">Logout</a>
         <% } %>
     </div>
 </body>
