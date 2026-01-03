@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=3.0, user-scalable=yes">
     <title>Expense Tracker</title>
     <style>
         * {
@@ -18,16 +18,29 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 20px;
+            padding: 16px;
+        }
+        
+        @media (max-width: 640px) {
+            body {
+                padding: 12px;
+            }
         }
         
         .container {
             background: white;
-            padding: 40px;
+            padding: 32px 24px;
             border-radius: 10px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
             max-width: 500px;
             width: 100%;
+        }
+        
+        @media (max-width: 640px) {
+            .container {
+                padding: 24px 16px;
+                border-radius: 8px;
+            }
         }
         
         h1 {
@@ -35,6 +48,12 @@
             margin-bottom: 10px;
             font-size: 2em;
             text-align: center;
+        }
+        
+        @media (max-width: 640px) {
+            h1 {
+                font-size: 1.6em;
+            }
         }
         
         .subtitle {
@@ -60,6 +79,14 @@
             font-weight: 500;
             cursor: pointer;
             transition: all 0.3s ease;
+            min-height: 44px; /* Better touch target for mobile */
+        }
+        
+        @media (max-width: 640px) {
+            .google-btn {
+                width: 100%;
+                padding: 14px 20px;
+            }
         }
         
         .google-btn:hover {
@@ -83,12 +110,20 @@
         
         .user-info {
             background: #f5f5f5;
-            padding: 15px;
+            padding: 12px;
             border-radius: 5px;
             margin-bottom: 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        @media (max-width: 640px) {
+            .user-info {
+                padding: 10px;
+            }
         }
         
         .user-details {
@@ -106,6 +141,7 @@
         .user-name {
             font-weight: 500;
             color: #333;
+            word-break: break-word;
         }
         
         .logout-btn {
@@ -116,6 +152,7 @@
             border-radius: 4px;
             cursor: pointer;
             font-size: 14px;
+            min-height: 44px; /* Better touch target for mobile */
         }
         
         .logout-btn:hover {
@@ -141,6 +178,15 @@
             border-radius: 4px;
             font-size: 16px;
             transition: border-color 0.3s;
+            -webkit-appearance: none; /* Remove default iOS styling */
+        }
+        
+        @media (max-width: 640px) {
+            input[type="number"],
+            input[type="text"] {
+                font-size: 16px; /* Prevents zoom on iOS */
+                min-height: 44px; /* Better touch target */
+            }
         }
         
         input[type="number"]:focus,
@@ -151,7 +197,7 @@
         
         .submit-btn {
             width: 100%;
-            padding: 12px;
+            padding: 14px 12px;
             background: #667eea;
             color: white;
             border: none;
@@ -160,6 +206,7 @@
             font-weight: 500;
             cursor: pointer;
             transition: background 0.3s;
+            min-height: 44px; /* Better touch target for mobile */
         }
         
         .submit-btn:hover {
@@ -326,9 +373,15 @@
         let accessToken = null;
         let currentUser = null;
         let userSpreadsheetId = null; // User's spreadsheet ID from localStorage or input
+        let tokenExpiryTime = null; // Store when the token expires
         
         // Constants
         const SPREADSHEET_ID_DISPLAY_LENGTH = 20;
+        const TOKEN_STORAGE_KEY = 'google_access_token';
+        const TOKEN_EXPIRY_KEY = 'google_token_expiry';
+        const USER_INFO_KEY = 'google_user_info';
+        const TOKEN_EXPIRY_SECONDS = 3600; // Google OAuth tokens typically expire in 1 hour
+        const TOKEN_EXPIRY_BUFFER_MS = 5 * 60 * 1000; // 5-minute buffer before token expiry
 
         // Initialize the Google API client
         function gapiLoaded() {
@@ -358,6 +411,8 @@
         function maybeEnableButtons() {
             if (gapiInited && gisInited) {
                 document.getElementById('loginBtn').disabled = false;
+                // Try to restore session from localStorage
+                restoreSession();
             }
         }
 
@@ -370,12 +425,76 @@
                 }
                 
                 accessToken = resp.access_token;
+                // Calculate token expiry time
+                const expiresIn = resp.expires_in || TOKEN_EXPIRY_SECONDS;
+                if (!resp.expires_in) {
+                    console.warn('Token expires_in not provided, using default:', TOKEN_EXPIRY_SECONDS);
+                }
+                tokenExpiryTime = Date.now() + expiresIn * 1000;
+                
+                // Save token and expiry to localStorage
+                saveSession();
+                
                 await getUserInfo();
                 showExpenseSection();
             };
 
-            tokenClient.requestAccessToken({ prompt: accessToken === null ? 'consent' : '' });
+            // Request access token - show consent if no saved session exists
+            const hasSavedSession = localStorage.getItem(TOKEN_STORAGE_KEY) !== null;
+            tokenClient.requestAccessToken({ prompt: hasSavedSession ? '' : 'consent' });
         });
+        
+        // Save session to localStorage
+        function saveSession() {
+            if (accessToken) {
+                localStorage.setItem(TOKEN_STORAGE_KEY, accessToken);
+                localStorage.setItem(TOKEN_EXPIRY_KEY, tokenExpiryTime.toString());
+            }
+            if (currentUser) {
+                localStorage.setItem(USER_INFO_KEY, JSON.stringify(currentUser));
+            }
+        }
+        
+        // Restore session from localStorage
+        async function restoreSession() {
+            const savedToken = localStorage.getItem(TOKEN_STORAGE_KEY);
+            const savedExpiry = localStorage.getItem(TOKEN_EXPIRY_KEY);
+            const savedUser = localStorage.getItem(USER_INFO_KEY);
+            
+            if (savedToken && savedExpiry && savedUser) {
+                const expiryTime = parseInt(savedExpiry);
+                
+                // Check if token is still valid with more than 5 minutes remaining
+                if (expiryTime > Date.now() + TOKEN_EXPIRY_BUFFER_MS) {
+                    accessToken = savedToken;
+                    tokenExpiryTime = expiryTime;
+                    currentUser = JSON.parse(savedUser);
+                    
+                    // Set the token for gapi client
+                    gapi.client.setToken({ access_token: accessToken });
+                    
+                    // Update UI with user info
+                    document.getElementById('userName').textContent = currentUser.name;
+                    document.getElementById('userAvatar').src = currentUser.picture;
+                    
+                    // Show the expense section
+                    showExpenseSection();
+                } else {
+                    // Token expired, clear storage
+                    clearSession();
+                }
+            }
+        }
+        
+        // Clear session from localStorage
+        function clearSession() {
+            localStorage.removeItem(TOKEN_STORAGE_KEY);
+            localStorage.removeItem(TOKEN_EXPIRY_KEY);
+            localStorage.removeItem(USER_INFO_KEY);
+            accessToken = null;
+            currentUser = null;
+            tokenExpiryTime = null;
+        }
 
         // Get user information
         async function getUserInfo() {
@@ -390,6 +509,9 @@
                     currentUser = await response.json();
                     document.getElementById('userName').textContent = currentUser.name;
                     document.getElementById('userAvatar').src = currentUser.picture;
+                    
+                    // Save updated user info to localStorage
+                    saveSession();
                 }
             } catch (error) {
                 console.error('Error getting user info:', error);
@@ -469,9 +591,22 @@
 
         // Handle logout
         document.getElementById('logoutBtn').addEventListener('click', () => {
-            accessToken = null;
-            currentUser = null;
-            // Don't clear spreadsheet ID on logout so users don't have to re-enter it
+            // Revoke token with Google before clearing session (fire-and-forget)
+            // We don't wait for revocation to complete to provide immediate UI feedback
+            if (accessToken) {
+                google.accounts.oauth2.revoke(accessToken, (done) => {
+                    if (done.error) {
+                        console.error('Error revoking token:', done.error);
+                    } else {
+                        console.log('Token revoked successfully');
+                    }
+                });
+            }
+            
+            // Clear session storage immediately
+            clearSession();
+            
+            // Reset UI
             document.getElementById('loginSection').style.display = 'block';
             document.getElementById('expenseSection').classList.remove('active');
             document.getElementById('expenseForm').reset();
@@ -528,6 +663,15 @@
                 return response.result;
             } catch (error) {
                 console.error('Error appending to sheet:', error);
+                
+                // Check if error is due to expired token
+                if (error.status === 401 || error.status === 403) {
+                    clearSession();
+                    showMessage('Session expired. Please log in again.', 'error');
+                    document.getElementById('loginSection').style.display = 'block';
+                    document.getElementById('expenseSection').classList.remove('active');
+                }
+                
                 throw error;
             }
         }
