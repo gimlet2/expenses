@@ -16,9 +16,10 @@ const CONFIG = {
     // Get this from Google Cloud Console
     apiKey: 'YOUR_GOOGLE_API_KEY',
     
-    // Your Google Spreadsheet ID
-    // Get this from the spreadsheet URL: https://docs.google.com/spreadsheets/d/{SPREADSHEET_ID}/edit
-    spreadsheetId: 'YOUR_SPREADSHEET_ID',
+    // Your Google Spreadsheet ID (OPTIONAL)
+    // Users will be prompted to enter their spreadsheet ID after login
+    // You can optionally set a default spreadsheet ID here
+    spreadsheetId: '',
     
     // These usually don't need to be changed
     discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4'],
