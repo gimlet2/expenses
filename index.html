@@ -232,19 +232,42 @@
             
             <div id="message" class="message"></div>
             
-            <form id="expenseForm">
+            <!-- Spreadsheet Configuration Section -->
+            <div id="spreadsheetConfig" style="display: none;">
                 <div class="form-group">
-                    <label for="amount">Amount ($)</label>
-                    <input type="number" id="amount" name="amount" step="0.01" required placeholder="0.00">
+                    <label for="spreadsheetId">Google Spreadsheet ID</label>
+                    <input type="text" id="spreadsheetId" name="spreadsheetId" required 
+                           placeholder="Enter your spreadsheet ID">
+                    <small style="color: #666; display: block; margin-top: 5px;">
+                        Find this in your spreadsheet URL: docs.google.com/spreadsheets/d/<strong>SPREADSHEET_ID</strong>/edit
+                    </small>
+                </div>
+                <button type="button" class="submit-btn" id="saveSpreadsheetBtn">Save Spreadsheet</button>
+            </div>
+            
+            <!-- Expense Form -->
+            <div id="expenseFormContainer" style="display: none;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding: 10px; background: #e8f5e9; border-radius: 4px;">
+                    <small style="color: #2e7d32;">
+                        <strong>Spreadsheet:</strong> <span id="currentSpreadsheetId" style="font-family: monospace;"></span>
+                    </small>
+                    <button type="button" id="changeSpreadsheetBtn" style="background: none; border: none; color: #667eea; cursor: pointer; text-decoration: underline; font-size: 13px;">Change</button>
                 </div>
                 
-                <div class="form-group">
-                    <label for="item">Item/Description</label>
-                    <input type="text" id="item" name="item" required placeholder="e.g., Coffee, Lunch, Gas">
-                </div>
-                
-                <button type="submit" class="submit-btn" id="submitBtn">Add Expense</button>
-            </form>
+                <form id="expenseForm">
+                    <div class="form-group">
+                        <label for="amount">Amount ($)</label>
+                        <input type="number" id="amount" name="amount" step="0.01" required placeholder="0.00">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="item">Item/Description</label>
+                        <input type="text" id="item" name="item" required placeholder="e.g., Coffee, Lunch, Gas">
+                    </div>
+                    
+                    <button type="submit" class="submit-btn" id="submitBtn">Add Expense</button>
+                </form>
+            </div>
         </div>
     </div>
 
@@ -253,16 +276,17 @@
         const CONFIG = {
             clientId: 'YOUR_GOOGLE_CLIENT_ID',
             apiKey: 'YOUR_GOOGLE_API_KEY',
-            spreadsheetId: 'YOUR_SPREADSHEET_ID',
+            // spreadsheetId is now entered by the user at runtime
+            spreadsheetId: '', // Optional: set a default spreadsheet ID here
             discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4'],
             scopes: 'https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email'
         };
 
         // Validate configuration
         function validateConfig() {
-            const placeholders = ['YOUR_GOOGLE_CLIENT_ID', 'YOUR_GOOGLE_API_KEY', 'YOUR_SPREADSHEET_ID'];
+            const placeholders = ['YOUR_GOOGLE_CLIENT_ID', 'YOUR_GOOGLE_API_KEY'];
             const invalidConfigs = placeholders.filter(p => 
-                Object.values(CONFIG).some(v => v.includes(p))
+                CONFIG.clientId.includes(p) || CONFIG.apiKey.includes(p)
             );
             
             if (invalidConfigs.length > 0) {
@@ -278,7 +302,6 @@
                                 <ul>
                                     <li>Google Client ID</li>
                                     <li>Google API Key</li>
-                                    <li>Google Spreadsheet ID</li>
                                 </ul>
                             </li>
                             <li>Save the file and reload this page</li>
@@ -302,6 +325,10 @@
         let gisInited = false;
         let accessToken = null;
         let currentUser = null;
+        let userSpreadsheetId = null; // User's spreadsheet ID from localStorage or input
+        
+        // Constants
+        const SPREADSHEET_ID_DISPLAY_LENGTH = 20;
 
         // Initialize the Google API client
         function gapiLoaded() {
@@ -373,12 +400,78 @@
         function showExpenseSection() {
             document.getElementById('loginSection').style.display = 'none';
             document.getElementById('expenseSection').classList.add('active');
+            
+            // Check if user has a spreadsheet ID configured
+            loadSpreadsheetConfig();
         }
+        
+        // Load spreadsheet configuration from localStorage or CONFIG
+        function loadSpreadsheetConfig() {
+            // Try to load from localStorage first
+            const savedSpreadsheetId = localStorage.getItem('spreadsheetId');
+            
+            if (savedSpreadsheetId) {
+                userSpreadsheetId = savedSpreadsheetId;
+                showExpenseForm();
+            } else if (CONFIG.spreadsheetId && CONFIG.spreadsheetId !== '') {
+                // Use default from CONFIG if available
+                userSpreadsheetId = CONFIG.spreadsheetId;
+                localStorage.setItem('spreadsheetId', userSpreadsheetId);
+                showExpenseForm();
+            } else {
+                // No spreadsheet configured, show configuration form
+                showSpreadsheetConfig();
+            }
+        }
+        
+        // Show spreadsheet configuration form
+        function showSpreadsheetConfig() {
+            document.getElementById('spreadsheetConfig').style.display = 'block';
+            document.getElementById('expenseFormContainer').style.display = 'none';
+        }
+        
+        // Show expense form with spreadsheet ID
+        function showExpenseForm() {
+            document.getElementById('spreadsheetConfig').style.display = 'none';
+            document.getElementById('expenseFormContainer').style.display = 'block';
+            document.getElementById('currentSpreadsheetId').textContent = 
+                userSpreadsheetId.substring(0, SPREADSHEET_ID_DISPLAY_LENGTH) + 
+                (userSpreadsheetId.length > SPREADSHEET_ID_DISPLAY_LENGTH ? '...' : '');
+        }
+        
+        // Save spreadsheet ID
+        document.getElementById('saveSpreadsheetBtn').addEventListener('click', () => {
+            const spreadsheetId = document.getElementById('spreadsheetId').value.trim();
+            
+            if (!spreadsheetId) {
+                showMessage('Please enter a spreadsheet ID', 'error');
+                return;
+            }
+            
+            // Basic validation - check minimum length and no whitespace
+            // Google Spreadsheet IDs are typically 44 characters long but can vary
+            if (spreadsheetId.length < 20 || /\s/.test(spreadsheetId)) {
+                showMessage('Invalid spreadsheet ID format. Please ensure you copied the correct ID from the URL.', 'error');
+                return;
+            }
+            
+            userSpreadsheetId = spreadsheetId;
+            localStorage.setItem('spreadsheetId', spreadsheetId);
+            showExpenseForm();
+            showMessage('Spreadsheet configured successfully!', 'success');
+        });
+        
+        // Change spreadsheet ID
+        document.getElementById('changeSpreadsheetBtn').addEventListener('click', () => {
+            document.getElementById('spreadsheetId').value = userSpreadsheetId;
+            showSpreadsheetConfig();
+        });
 
         // Handle logout
         document.getElementById('logoutBtn').addEventListener('click', () => {
             accessToken = null;
             currentUser = null;
+            // Don't clear spreadsheet ID on logout so users don't have to re-enter it
             document.getElementById('loginSection').style.display = 'block';
             document.getElementById('expenseSection').classList.remove('active');
             document.getElementById('expenseForm').reset();
@@ -424,7 +517,7 @@
 
             try {
                 const response = await gapi.client.sheets.spreadsheets.values.append({
-                    spreadsheetId: CONFIG.spreadsheetId,
+                    spreadsheetId: userSpreadsheetId,
                     range: 'Sheet1!A:E',
                     valueInputOption: 'USER_ENTERED',
                     resource: {

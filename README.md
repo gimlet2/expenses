@@ -71,11 +71,14 @@ Open `index.html` in a text editor and update the `CONFIG` object with your valu
 const CONFIG = {
     clientId: 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com',
     apiKey: 'YOUR_GOOGLE_API_KEY',
-    spreadsheetId: 'YOUR_SPREADSHEET_ID',
+    // spreadsheetId is now optional - users will enter it at runtime
+    spreadsheetId: '', // Optional: set a default spreadsheet ID here
     discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4'],
     scopes: 'https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email'
 };
 ```
+
+**Note:** You only need to configure the Client ID and API Key. Users will be able to enter their own spreadsheet ID after logging in.
 
 Alternatively, you can use the external config file:
 1. Copy `config.example.js` to `config.js`
@@ -120,10 +123,15 @@ Then open your browser and navigate to `http://localhost:8000`
 3. Select your Google account and authorize the application to:
    - View basic profile information
    - Access your Google Sheets
-4. Once logged in, you'll see the expense entry form
-5. Enter an amount and item description
-6. Click "Add Expense"
-7. Your expense will be saved to the Google Spreadsheet with timestamp, your name, email, amount, and item
+4. Once logged in, you'll be prompted to enter your **Google Spreadsheet ID**
+   - Find this in your spreadsheet URL: `https://docs.google.com/spreadsheets/d/{SPREADSHEET_ID}/edit`
+   - Copy just the ID portion (the long string of letters, numbers, dashes, and underscores)
+   - Click "Save Spreadsheet"
+5. The spreadsheet ID will be saved in your browser's local storage for future sessions
+6. Enter an amount and item description in the expense entry form
+7. Click "Add Expense"
+8. Your expense will be saved to the Google Spreadsheet with timestamp, your name, email, amount, and item
+9. You can change the spreadsheet ID anytime by clicking the "Change" button
 
 ## Data Format
 
@@ -154,8 +162,9 @@ Expenses are stored in Google Sheets with the following columns:
 
 ### "Access denied" when writing to spreadsheet
 - Verify the Google account you're logged in with has **edit access** to the spreadsheet
-- Check that the Spreadsheet ID in the CONFIG is correct
+- Double-check that the Spreadsheet ID you entered is correct
 - Ensure the Google Sheets API is enabled in your Google Cloud project
+- Make sure the spreadsheet ID doesn't contain any extra characters or spaces
 
 ### "Invalid client" or OAuth errors
 - Double-check your Client ID is correct in the CONFIG object
