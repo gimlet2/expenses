@@ -326,6 +326,9 @@
         let accessToken = null;
         let currentUser = null;
         let userSpreadsheetId = null; // User's spreadsheet ID from localStorage or input
+        
+        // Constants
+        const SPREADSHEET_ID_DISPLAY_LENGTH = 20;
 
         // Initialize the Google API client
         function gapiLoaded() {
@@ -432,7 +435,8 @@
             document.getElementById('spreadsheetConfig').style.display = 'none';
             document.getElementById('expenseFormContainer').style.display = 'block';
             document.getElementById('currentSpreadsheetId').textContent = 
-                userSpreadsheetId.substring(0, 20) + (userSpreadsheetId.length > 20 ? '...' : '');
+                userSpreadsheetId.substring(0, SPREADSHEET_ID_DISPLAY_LENGTH) + 
+                (userSpreadsheetId.length > SPREADSHEET_ID_DISPLAY_LENGTH ? '...' : '');
         }
         
         // Save spreadsheet ID
@@ -444,9 +448,10 @@
                 return;
             }
             
-            // Basic validation - should be alphanumeric with dashes/underscores
-            if (!/^[a-zA-Z0-9_-]+$/.test(spreadsheetId)) {
-                showMessage('Invalid spreadsheet ID format', 'error');
+            // Basic validation - check minimum length and no whitespace
+            // Google Spreadsheet IDs are typically 44 characters long but can vary
+            if (spreadsheetId.length < 20 || /\s/.test(spreadsheetId)) {
+                showMessage('Invalid spreadsheet ID format. Please ensure you copied the correct ID from the URL.', 'error');
                 return;
             }
             
