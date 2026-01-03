@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-    <title>Expense Tracker</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=3.0, user-scalable=yes">
+    <title>Expense Tracker</title></title>
     <style>
         * {
             margin: 0;
@@ -380,6 +380,8 @@
         const TOKEN_STORAGE_KEY = 'google_access_token';
         const TOKEN_EXPIRY_KEY = 'google_token_expiry';
         const USER_INFO_KEY = 'google_user_info';
+        const TOKEN_EXPIRY_SECONDS = 3600; // Google OAuth tokens typically expire in 1 hour
+        const TOKEN_EXPIRY_BUFFER_MS = 5 * 60 * 1000; // 5-minute buffer before token expiry
 
         // Initialize the Google API client
         function gapiLoaded() {
@@ -424,7 +426,7 @@
                 
                 accessToken = resp.access_token;
                 // Calculate token expiry time (Google tokens typically expire in 3600 seconds)
-                tokenExpiryTime = Date.now() + (resp.expires_in || 3600) * 1000;
+                tokenExpiryTime = Date.now() + (resp.expires_in || TOKEN_EXPIRY_SECONDS) * 1000;
                 
                 // Save token and expiry to localStorage
                 saveSession();
@@ -459,7 +461,7 @@
                 const expiryTime = parseInt(savedExpiry);
                 
                 // Check if token is still valid (with 5 minute buffer)
-                if (expiryTime > Date.now() + (5 * 60 * 1000)) {
+                if (expiryTime > Date.now() + TOKEN_EXPIRY_BUFFER_MS) {
                     accessToken = savedToken;
                     tokenExpiryTime = expiryTime;
                     currentUser = JSON.parse(savedUser);
@@ -587,8 +589,12 @@
         document.getElementById('logoutBtn').addEventListener('click', () => {
             // Revoke token with Google before clearing session
             if (accessToken) {
-                google.accounts.oauth2.revoke(accessToken, () => {
-                    console.log('Token revoked');
+                google.accounts.oauth2.revoke(accessToken, (done) => {
+                    if (done.error) {
+                        console.error('Error revoking token:', done.error);
+                    } else {
+                        console.log('Token revoked successfully');
+                    }
                 });
             }
             
