@@ -433,7 +433,9 @@
                 showExpenseSection();
             };
 
-            tokenClient.requestAccessToken({ prompt: accessToken === null ? 'consent' : '' });
+            // Request access token - show consent if no saved session exists
+            const hasSavedSession = localStorage.getItem(TOKEN_STORAGE_KEY) !== null;
+            tokenClient.requestAccessToken({ prompt: hasSavedSession ? '' : 'consent' });
         });
         
         // Save session to localStorage
@@ -583,15 +585,15 @@
 
         // Handle logout
         document.getElementById('logoutBtn').addEventListener('click', () => {
-            // Clear session storage
-            clearSession();
-            
-            // Revoke token with Google
+            // Revoke token with Google before clearing session
             if (accessToken) {
                 google.accounts.oauth2.revoke(accessToken, () => {
                     console.log('Token revoked');
                 });
             }
+            
+            // Clear session storage
+            clearSession();
             
             // Reset UI
             document.getElementById('loginSection').style.display = 'block';
