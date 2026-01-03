@@ -73,7 +73,7 @@ const CONFIG = {
     apiKey: 'YOUR_GOOGLE_API_KEY',
     spreadsheetId: 'YOUR_SPREADSHEET_ID',
     discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4'],
-    scopes: 'https://www.googleapis.com/auth/spreadsheets'
+    scopes: 'https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email'
 };
 ```
 

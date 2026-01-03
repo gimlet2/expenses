@@ -22,5 +22,5 @@ const CONFIG = {
     
     // These usually don't need to be changed
     discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4'],
-    scopes: 'https://www.googleapis.com/auth/spreadsheets'
+    scopes: 'https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email'
 };
