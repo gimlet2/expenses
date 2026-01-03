@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=3.0, user-scalable=yes">
-    <title>Expense Tracker</title></title>
+    <title>Expense Tracker</title>
     <style>
         * {
             margin: 0;
@@ -425,8 +425,12 @@
                 }
                 
                 accessToken = resp.access_token;
-                // Calculate token expiry time (Google tokens typically expire in 3600 seconds)
-                tokenExpiryTime = Date.now() + (resp.expires_in || TOKEN_EXPIRY_SECONDS) * 1000;
+                // Calculate token expiry time
+                const expiresIn = resp.expires_in || TOKEN_EXPIRY_SECONDS;
+                if (!resp.expires_in) {
+                    console.warn('Token expires_in not provided, using default:', TOKEN_EXPIRY_SECONDS);
+                }
+                tokenExpiryTime = Date.now() + expiresIn * 1000;
                 
                 // Save token and expiry to localStorage
                 saveSession();
@@ -460,7 +464,7 @@
             if (savedToken && savedExpiry && savedUser) {
                 const expiryTime = parseInt(savedExpiry);
                 
-                // Check if token is still valid (with 5 minute buffer)
+                // Check if token is still valid with more than 5 minutes remaining
                 if (expiryTime > Date.now() + TOKEN_EXPIRY_BUFFER_MS) {
                     accessToken = savedToken;
                     tokenExpiryTime = expiryTime;
@@ -587,7 +591,8 @@
 
         // Handle logout
         document.getElementById('logoutBtn').addEventListener('click', () => {
-            // Revoke token with Google before clearing session
+            // Revoke token with Google before clearing session (fire-and-forget)
+            // We don't wait for revocation to complete to provide immediate UI feedback
             if (accessToken) {
                 google.accounts.oauth2.revoke(accessToken, (done) => {
                     if (done.error) {
@@ -598,7 +603,7 @@
                 });
             }
             
-            // Clear session storage
+            // Clear session storage immediately
             clearSession();
             
             // Reset UI
