@@ -245,6 +245,41 @@
             padding: 20px 0;
             font-style: italic;
         }
+
+        .location-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .location-group input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: #667eea;
+        }
+
+        .location-group label {
+            margin-bottom: 0;
+            cursor: pointer;
+            font-weight: 400;
+        }
+
+        .expense-item-location {
+            font-size: 12px;
+            color: #888;
+            margin-top: 2px;
+        }
+
+        .expense-item-location a {
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        .expense-item-location a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
@@ -263,6 +298,11 @@
             <div class="form-group">
                 <label for="item">Item / Description</label>
                 <input type="text" id="item" name="item" required placeholder="e.g., Coffee, Lunch, Gas">
+            </div>
+
+            <div class="location-group">
+                <input type="checkbox" id="captureLocation" name="captureLocation">
+                <label for="captureLocation">Capture my location</label>
             </div>
 
             <button type="submit" class="btn btn-primary" id="submitBtn">Add Expense</button>
@@ -331,6 +371,35 @@
             });
         }
 
+        // ── Geolocation helper ───────────────────────────────────────────────
+        function getCurrentLocation() {
+            return new Promise((resolve, reject) => {
+                if (!navigator.geolocation) {
+                    reject(new Error('Geolocation is not supported by your browser.'));
+                    return;
+                }
+                navigator.geolocation.getCurrentPosition(
+                    (position) => resolve({
+                        latitude: position.coords.latitude,
+                        longitude: position.coords.longitude,
+                        accuracy: position.coords.accuracy
+                    }),
+                    (error) => reject(error),
+                    { timeout: 10000, maximumAge: 0 }
+                );
+            });
+        }
+
+        function getLocationErrorMessage(error) {
+            if (!error || !error.code) return error.message || 'Unknown error';
+            switch (error.code) {
+                case 1: return 'Location permission denied';
+                case 2: return 'Location unavailable';
+                case 3: return 'Location request timed out';
+                default: return error.message || 'Unknown error';
+            }
+        }
+
         // ── App state ────────────────────────────────────────────────────────
         let db = null;
 
@@ -369,6 +438,10 @@
                     <div class="expense-details">
                         <div class="expense-item-name">${escapeHtml(expense.item)}</div>
                         <div class="expense-item-date">${dateStr} ${timeStr}</div>
+                        ${(typeof expense.latitude === 'number' && expense.latitude >= -90 && expense.latitude <= 90 &&
+                           typeof expense.longitude === 'number' && expense.longitude >= -180 && expense.longitude <= 180)
+                            ? `<div class="expense-item-location"><a href="https://www.openstreetmap.org/?mlat=${expense.latitude}&mlon=${expense.longitude}&zoom=16" target="_blank" rel="noopener noreferrer">📍 ${expense.latitude.toFixed(4)}, ${expense.longitude.toFixed(4)}</a></div>`
+                            : ''}
                     </div>
                     <span class="expense-amount">$${parseFloat(expense.amount).toFixed(2)}</span>
                     <button class="btn btn-danger delete-btn" data-id="${expense.id}" aria-label="Delete expense">✕</button>
@@ -400,12 +473,28 @@
             submitBtn.disabled = true;
             submitBtn.textContent = 'Saving…';
 
+            let locationData = null;
+            if (document.getElementById('captureLocation').checked) {
+                submitBtn.textContent = 'Getting location…';
+                try {
+                    locationData = await getCurrentLocation();
+                } catch (err) {
+                    showMessage('Could not get location: ' + getLocationErrorMessage(err) + '. Saving without location.', 'error');
+                }
+                submitBtn.textContent = 'Saving…';
+            }
+
             try {
                 const expense = {
                     amount: parseFloat(amount),
                     item: item,
                     timestamp: Date.now()
                 };
+                if (locationData) {
+                    expense.latitude = locationData.latitude;
+                    expense.longitude = locationData.longitude;
+                    expense.accuracy = locationData.accuracy;
+                }
 
                 await addExpenseToDB(db, expense);
                 showMessage('Expense added!', 'success');
@@ -444,13 +533,15 @@
                 return;
             }
 
-            const rows = [['Date', 'Item', 'Amount']];
+            const rows = [['Date', 'Item', 'Amount', 'Latitude', 'Longitude']];
             expenses.forEach(expense => {
                 const date = new Date(expense.timestamp).toLocaleString();
                 rows.push([
                     `"${date}"`,
                     `"${expense.item.replace(/"/g, '""')}"`,
-                    expense.amount.toFixed(2)
+                    expense.amount.toFixed(2),
+                    expense.latitude != null && typeof expense.latitude === 'number' && expense.latitude >= -90 && expense.latitude <= 90 ? expense.latitude : '',
+                    expense.longitude != null && typeof expense.longitude === 'number' && expense.longitude >= -180 && expense.longitude <= 180 ? expense.longitude : ''
                 ]);
             });
 
