@@ -379,6 +379,72 @@
         .expense-item-location a:hover {
             text-decoration: underline;
         }
+
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+            background: white;
+            cursor: pointer;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        @media (max-width: 640px) {
+            select {
+                font-size: 16px;
+                min-height: 44px;
+            }
+        }
+
+        .expense-category {
+            font-size: 12px;
+            color: #667eea;
+            margin-top: 2px;
+        }
+
+        .btn-edit {
+            background: #667eea;
+            color: white;
+            font-size: 13px;
+            padding: 6px 10px;
+            min-height: unset;
+            flex-shrink: 0;
+        }
+
+        .btn-edit:hover {
+            background: #5568d3;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .form-actions .btn-primary {
+            flex: 1;
+        }
+
+        .edit-banner {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 4px;
+            padding: 8px 12px;
+            margin-bottom: 16px;
+            font-size: 14px;
+            color: #856404;
+            display: none;
+        }
+
+        .edit-banner.show {
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -387,6 +453,8 @@
         <p class="subtitle">Track your expenses locally — no account needed</p>
 
         <div id="message" class="message"></div>
+
+        <div class="edit-banner" id="editBanner">✏️ Editing expense – make your changes and click <strong>Update Expense</strong>.</div>
 
         <form id="expenseForm">
             <div class="form-group">
@@ -399,12 +467,33 @@
                 <input type="text" id="item" name="item" required placeholder="e.g., Coffee, Lunch, Gas">
             </div>
 
+            <div class="form-group">
+                <label for="category">Category (optional)</label>
+                <select id="category" name="category">
+                    <option value="">— No category —</option>
+                    <option value="coffee">☕ Coffee</option>
+                    <option value="restaurant">🍽️ Restaurant</option>
+                    <option value="groceries">🛒 Groceries</option>
+                    <option value="transport">🚗 Transport</option>
+                    <option value="healthcare">🏥 Healthcare</option>
+                    <option value="housing">🏠 Housing</option>
+                    <option value="utilities">💡 Utilities</option>
+                    <option value="entertainment">🎬 Entertainment</option>
+                    <option value="clothing">👗 Clothing</option>
+                    <option value="education">📚 Education</option>
+                    <option value="other">📌 Other</option>
+                </select>
+            </div>
+
             <div class="location-group">
                 <input type="checkbox" id="captureLocation" name="captureLocation">
                 <label for="captureLocation">Capture my location</label>
             </div>
 
-            <button type="submit" class="btn btn-primary" id="submitBtn">Add Expense</button>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary" id="submitBtn">Add Expense</button>
+                <button type="button" class="btn btn-secondary" id="cancelEditBtn" style="display:none">Cancel</button>
+            </div>
         </form>
 
         <div class="section-header">
@@ -448,6 +537,25 @@
         const DB_NAME = 'expenseTrackerDB';
         const DB_VERSION = 1;
         const STORE_NAME = 'expenses';
+
+        // ── Categories ───────────────────────────────────────────────────────
+        const CATEGORIES = [
+            { value: 'coffee',        label: 'Coffee',        icon: '☕' },
+            { value: 'restaurant',    label: 'Restaurant',    icon: '🍽️' },
+            { value: 'groceries',     label: 'Groceries',     icon: '🛒' },
+            { value: 'transport',     label: 'Transport',     icon: '🚗' },
+            { value: 'healthcare',    label: 'Healthcare',    icon: '🏥' },
+            { value: 'housing',       label: 'Housing',       icon: '🏠' },
+            { value: 'utilities',     label: 'Utilities',     icon: '💡' },
+            { value: 'entertainment', label: 'Entertainment', icon: '🎬' },
+            { value: 'clothing',      label: 'Clothing',      icon: '👗' },
+            { value: 'education',     label: 'Education',     icon: '📚' },
+            { value: 'other',         label: 'Other',         icon: '📌' },
+        ];
+
+        function getCategoryEntry(value) {
+            return CATEGORIES.find(c => c.value === value) || null;
+        }
 
         function openDB() {
             return new Promise((resolve, reject) => {
@@ -496,6 +604,16 @@
             });
         }
 
+        function updateExpenseInDB(db, expense) {
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction(STORE_NAME, 'readwrite');
+                const store = tx.objectStore(STORE_NAME);
+                const request = store.put(expense);
+                request.onsuccess = () => resolve();
+                request.onerror = (event) => reject(event.target.error);
+            });
+        }
+
         // ── Geolocation helper ───────────────────────────────────────────────
         function getCurrentLocation() {
             return new Promise((resolve, reject) => {
@@ -527,6 +645,8 @@
 
         // ── App state ────────────────────────────────────────────────────────
         let db = null;
+        let editingId = null;
+        let currentEditExpense = null;
 
         async function init() {
             db = await openDB();
@@ -559,9 +679,15 @@
                 const dateStr = date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
                 const timeStr = date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
 
+                const cat = getCategoryEntry(expense.category);
+                const categoryHtml = cat
+                    ? `<div class="expense-category">${cat.icon} ${cat.label}</div>`
+                    : '';
+
                 li.innerHTML = `
                     <div class="expense-details">
                         <div class="expense-item-name">${escapeHtml(expense.item)}</div>
+                        ${categoryHtml}
                         <div class="expense-item-date">${dateStr} ${timeStr}</div>
                         ${(typeof expense.latitude === 'number' && expense.latitude >= -90 && expense.latitude <= 90 &&
                            typeof expense.longitude === 'number' && expense.longitude >= -180 && expense.longitude <= 180)
@@ -569,6 +695,7 @@
                             : ''}
                     </div>
                     <span class="expense-amount">$${parseFloat(expense.amount).toFixed(2)}</span>
+                    <button class="btn btn-edit edit-btn" data-id="${expense.id}" aria-label="Edit expense">✏️</button>
                     <button class="btn btn-danger delete-btn" data-id="${expense.id}" aria-label="Delete expense">✕</button>
                 `;
 
@@ -588,6 +715,7 @@
 
             const amount = document.getElementById('amount').value;
             const item = document.getElementById('item').value.trim();
+            const category = document.getElementById('category').value;
 
             if (!amount || !item) {
                 showMessage('Both amount and item are required.', 'error');
@@ -610,53 +738,113 @@
             }
 
             try {
-                const expense = {
-                    amount: parseFloat(amount),
-                    item: item,
-                    timestamp: Date.now()
-                };
-                if (locationData) {
-                    expense.latitude = locationData.latitude;
-                    expense.longitude = locationData.longitude;
-                    expense.accuracy = locationData.accuracy;
+                if (editingId !== null) {
+                    // Build updated expense preserving original id and timestamp
+                    const updated = {
+                        ...currentEditExpense,
+                        amount: parseFloat(amount),
+                        item,
+                    };
+                    if (category) {
+                        updated.category = category;
+                    } else {
+                        delete updated.category;
+                    }
+                    // If location re-captured, use new data; if checkbox unchecked keep existing
+                    if (locationData) {
+                        updated.latitude = locationData.latitude;
+                        updated.longitude = locationData.longitude;
+                        updated.accuracy = locationData.accuracy;
+                    }
+                    await updateExpenseInDB(db, updated);
+                    showMessage('Expense updated!', 'success');
+                    cancelEdit();
+                } else {
+                    const expense = {
+                        amount: parseFloat(amount),
+                        item,
+                        timestamp: Date.now(),
+                    };
+                    if (category) expense.category = category;
+                    if (locationData) {
+                        expense.latitude = locationData.latitude;
+                        expense.longitude = locationData.longitude;
+                        expense.accuracy = locationData.accuracy;
+                    }
+                    await addExpenseToDB(db, expense);
+                    showMessage('Expense added!', 'success');
+                    document.getElementById('expenseForm').reset();
                 }
-
-                await addExpenseToDB(db, expense);
-                showMessage('Expense added!', 'success');
-                document.getElementById('expenseForm').reset();
                 await renderExpenses();
             } catch (error) {
                 console.error('Error saving expense:', error);
                 showMessage('Failed to save expense. Please try again.', 'error');
             } finally {
                 submitBtn.disabled = false;
-                submitBtn.textContent = 'Add Expense';
+                submitBtn.textContent = editingId !== null ? 'Update Expense' : 'Add Expense';
             }
         });
 
-        // ── Delete expense ───────────────────────────────────────────────────
-        document.getElementById('expensesList').addEventListener('click', async (e) => {
-            const btn = e.target.closest('.delete-btn');
-            if (!btn) return;
+        // ── Edit helpers ─────────────────────────────────────────────────────
+        function startEdit(expense) {
+            editingId = expense.id;
+            currentEditExpense = expense;
+            document.getElementById('amount').value = expense.amount;
+            document.getElementById('item').value = expense.item;
+            document.getElementById('category').value = expense.category || '';
+            document.getElementById('captureLocation').checked = false;
+            document.getElementById('submitBtn').textContent = 'Update Expense';
+            document.getElementById('cancelEditBtn').style.display = '';
+            document.getElementById('editBanner').classList.add('show');
+            document.getElementById('expenseForm').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
 
-            const id = parseInt(btn.dataset.id, 10);
-            try {
-                await deleteExpenseFromDB(db, id);
-                await renderExpenses();
-            } catch (error) {
-                console.error('Error deleting expense:', error);
-                showMessage('Failed to delete expense.', 'error');
+        function cancelEdit() {
+            editingId = null;
+            currentEditExpense = null;
+            document.getElementById('expenseForm').reset();
+            document.getElementById('submitBtn').textContent = 'Add Expense';
+            document.getElementById('cancelEditBtn').style.display = 'none';
+            document.getElementById('editBanner').classList.remove('show');
+        }
+
+        document.getElementById('cancelEditBtn').addEventListener('click', cancelEdit);
+
+        // ── Delete / Edit expense ────────────────────────────────────────────
+        document.getElementById('expensesList').addEventListener('click', async (e) => {
+            const deleteBtn = e.target.closest('.delete-btn');
+            if (deleteBtn) {
+                const id = parseInt(deleteBtn.dataset.id, 10);
+                if (editingId === id) cancelEdit();
+                try {
+                    await deleteExpenseFromDB(db, id);
+                    await renderExpenses();
+                } catch (error) {
+                    console.error('Error deleting expense:', error);
+                    showMessage('Failed to delete expense.', 'error');
+                }
+                return;
+            }
+
+            const editBtn = e.target.closest('.edit-btn');
+            if (editBtn) {
+                const id = parseInt(editBtn.dataset.id, 10);
+                const expenses = await getAllExpenses(db);
+                const expense = expenses.find(ex => ex.id === id);
+                if (expense) startEdit(expense);
             }
         });
 
         // ── CSV Export ───────────────────────────────────────────────────────
         function downloadCSV(expenses, filename) {
-            const rows = [['Date', 'Item', 'Amount', 'Latitude', 'Longitude']];
+            const rows = [['Date', 'Item', 'Category', 'Amount', 'Latitude', 'Longitude']];
             expenses.forEach(expense => {
                 const date = new Date(expense.timestamp).toLocaleString();
+                const cat = getCategoryEntry(expense.category);
                 rows.push([
                     `"${date}"`,
                     `"${expense.item.replace(/"/g, '""')}"`,
+                    cat ? `"${cat.label.replace(/"/g, '""')}"` : '',
                     expense.amount.toFixed(2),
                     expense.latitude != null && typeof expense.latitude === 'number' && expense.latitude >= -90 && expense.latitude <= 90 ? expense.latitude : '',
                     expense.longitude != null && typeof expense.longitude === 'number' && expense.longitude >= -180 && expense.longitude <= 180 ? expense.longitude : ''
