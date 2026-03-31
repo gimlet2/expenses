@@ -279,6 +279,39 @@
             border: 1px solid #f5c6cb;
         }
 
+        .monthly-summary {
+            display: flex;
+            gap: 12px;
+            margin: 20px 0 0;
+        }
+
+        .monthly-summary-card {
+            flex: 1;
+            background: #f0f2ff;
+            border: 1px solid #d0d4ff;
+            border-radius: 8px;
+            padding: 12px 16px;
+            text-align: center;
+        }
+
+        .monthly-summary-card .summary-label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 4px;
+        }
+
+        .monthly-summary-card .summary-amount {
+            font-size: 1.4em;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        @media (max-width: 400px) {
+            .monthly-summary {
+                flex-direction: column;
+            }
+        }
+
         .section-header {
             display: flex;
             justify-content: space-between;
@@ -536,6 +569,17 @@
             </div>
         </form>
 
+        <div class="monthly-summary" id="monthlySummary">
+            <div class="monthly-summary-card">
+                <div class="summary-label">This month</div>
+                <div class="summary-amount" id="currentMonthTotal">$0.00</div>
+            </div>
+            <div class="monthly-summary-card">
+                <div class="summary-label">Last month</div>
+                <div class="summary-amount" id="previousMonthTotal">$0.00</div>
+            </div>
+        </div>
+
         <div class="section-header">
             <h2>Recent Expenses</h2>
             <div class="export-dropdown">
@@ -693,11 +737,39 @@
             await renderExpenses();
         }
 
+        // ── Monthly summary ──────────────────────────────────────────────────
+        function renderMonthlySummary(expenses) {
+            const now = new Date();
+            const currentYear = now.getFullYear();
+            const currentMonth = now.getMonth();
+
+            const prevYear = currentMonth === 0 ? currentYear - 1 : currentYear;
+            const prevMonth = currentMonth === 0 ? 11 : currentMonth - 1;
+
+            const currentStart = new Date(currentYear, currentMonth, 1).getTime();
+            const currentEnd = new Date(currentYear, currentMonth + 1, 0, 23, 59, 59, 999).getTime();
+            const previousStart = new Date(prevYear, prevMonth, 1).getTime();
+            const previousEnd = new Date(prevYear, prevMonth + 1, 0, 23, 59, 59, 999).getTime();
+
+            const { currentTotal, previousTotal } = expenses.reduce((acc, e) => {
+                const ts = e.timestamp;
+                const amt = parseFloat(e.amount);
+                if (ts >= currentStart && ts <= currentEnd) acc.currentTotal += amt;
+                else if (ts >= previousStart && ts <= previousEnd) acc.previousTotal += amt;
+                return acc;
+            }, { currentTotal: 0, previousTotal: 0 });
+
+            document.getElementById('currentMonthTotal').textContent = `$${currentTotal.toFixed(2)}`;
+            document.getElementById('previousMonthTotal').textContent = `$${previousTotal.toFixed(2)}`;
+        }
+
         // ── Rendering ────────────────────────────────────────────────────────
         async function renderExpenses() {
             const expenses = await getAllExpenses(db);
             const list = document.getElementById('expensesList');
             const noExpenses = document.getElementById('noExpenses');
+
+            renderMonthlySummary(expenses);
 
             // Clear existing expense items (keep the noExpenses placeholder)
             Array.from(list.querySelectorAll('.expense-item')).forEach(el => el.remove());
