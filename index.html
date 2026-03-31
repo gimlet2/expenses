@@ -445,6 +445,41 @@
         .edit-banner.show {
             display: block;
         }
+
+        .vacation-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .vacation-group input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: #f6a623;
+        }
+
+        .vacation-group label {
+            margin-bottom: 0;
+            cursor: pointer;
+            font-weight: 400;
+        }
+
+        .expense-item.vacation {
+            background: #fff8e7;
+            border-left: 4px solid #f6a623;
+        }
+
+        .expense-item.vacation:nth-child(even) {
+            background: #fff3d4;
+        }
+
+        .expense-vacation-badge {
+            font-size: 12px;
+            color: #b07800;
+            margin-top: 2px;
+        }
     </style>
 </head>
 <body>
@@ -488,6 +523,11 @@
             <div class="location-group">
                 <input type="checkbox" id="captureLocation" name="captureLocation">
                 <label for="captureLocation">Capture my location</label>
+            </div>
+
+            <div class="vacation-group">
+                <input type="checkbox" id="vacation" name="vacation">
+                <label for="vacation">🏖️ Vacation expense</label>
             </div>
 
             <div class="form-actions">
@@ -672,7 +712,7 @@
             // Show newest first
             expenses.slice().reverse().forEach(expense => {
                 const li = document.createElement('li');
-                li.className = 'expense-item';
+                li.className = 'expense-item' + (expense.vacation === true ? ' vacation' : '');
                 li.dataset.id = expense.id;
 
                 const date = new Date(expense.timestamp);
@@ -683,11 +723,15 @@
                 const categoryHtml = cat
                     ? `<div class="expense-category">${cat.icon} ${cat.label}</div>`
                     : '';
+                const vacationHtml = expense.vacation === true
+                    ? `<div class="expense-vacation-badge">🏖️ Vacation</div>`
+                    : '';
 
                 li.innerHTML = `
                     <div class="expense-details">
                         <div class="expense-item-name">${escapeHtml(expense.item)}</div>
                         ${categoryHtml}
+                        ${vacationHtml}
                         <div class="expense-item-date">${dateStr} ${timeStr}</div>
                         ${(typeof expense.latitude === 'number' && expense.latitude >= -90 && expense.latitude <= 90 &&
                            typeof expense.longitude === 'number' && expense.longitude >= -180 && expense.longitude <= 180)
@@ -716,6 +760,7 @@
             const amount = document.getElementById('amount').value;
             const item = document.getElementById('item').value.trim();
             const category = document.getElementById('category').value;
+            const vacation = document.getElementById('vacation').checked;
 
             if (!amount || !item) {
                 showMessage('Both amount and item are required.', 'error');
@@ -744,6 +789,7 @@
                         ...currentEditExpense,
                         amount: parseFloat(amount),
                         item,
+                        vacation,
                     };
                     if (category) {
                         updated.category = category;
@@ -764,6 +810,7 @@
                         amount: parseFloat(amount),
                         item,
                         timestamp: Date.now(),
+                        vacation,
                     };
                     if (category) expense.category = category;
                     if (locationData) {
@@ -793,6 +840,7 @@
             document.getElementById('item').value = expense.item;
             document.getElementById('category').value = expense.category || '';
             document.getElementById('captureLocation').checked = false;
+            document.getElementById('vacation').checked = !!expense.vacation;
             document.getElementById('submitBtn').textContent = 'Update Expense';
             document.getElementById('cancelEditBtn').style.display = '';
             document.getElementById('editBanner').classList.add('show');
@@ -837,7 +885,7 @@
 
         // ── CSV Export ───────────────────────────────────────────────────────
         function downloadCSV(expenses, filename) {
-            const rows = [['Date', 'Item', 'Category', 'Amount', 'Latitude', 'Longitude']];
+            const rows = [['Date', 'Item', 'Category', 'Amount', 'Vacation', 'Latitude', 'Longitude']];
             expenses.forEach(expense => {
                 const date = new Date(expense.timestamp).toLocaleString();
                 const cat = getCategoryEntry(expense.category);
@@ -846,6 +894,7 @@
                     `"${expense.item.replace(/"/g, '""')}"`,
                     cat ? `"${cat.label.replace(/"/g, '""')}"` : '',
                     expense.amount.toFixed(2),
+                    expense.vacation === true ? 'Yes' : 'No',
                     expense.latitude != null && typeof expense.latitude === 'number' && expense.latitude >= -90 && expense.latitude <= 90 ? expense.latitude : '',
                     expense.longitude != null && typeof expense.longitude === 'number' && expense.longitude >= -180 && expense.longitude <= 180 ? expense.longitude : ''
                 ]);
