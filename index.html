@@ -513,6 +513,116 @@
             color: #b07800;
             margin-top: 2px;
         }
+
+        /* ── View tabs ──────────────────────────────────────────────────────── */
+        .view-tabs {
+            display: flex;
+            gap: 0;
+            margin: 28px 0 0;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .view-tab {
+            padding: 8px 20px;
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+            font-size: 15px;
+            font-weight: 500;
+            color: #888;
+            cursor: pointer;
+            transition: color 0.2s, border-color 0.2s;
+        }
+
+        .view-tab:hover {
+            color: #667eea;
+        }
+
+        .view-tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        /* ── Analytics table ────────────────────────────────────────────────── */
+        #analyticsView {
+            display: none;
+        }
+
+        .analytics-table-wrap {
+            overflow-x: auto;
+            margin-top: 16px;
+        }
+
+        .analytics-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        .analytics-table th,
+        .analytics-table td {
+            padding: 8px 12px;
+            text-align: right;
+            white-space: nowrap;
+            border-bottom: 1px solid #eee;
+        }
+
+        .analytics-table th:first-child,
+        .analytics-table td:first-child {
+            text-align: left;
+            position: sticky;
+            left: 0;
+            background: white;
+            z-index: 1;
+        }
+
+        .analytics-table thead th {
+            background: #f0f2ff;
+            color: #555;
+            font-weight: 600;
+            border-bottom: 2px solid #d0d4ff;
+        }
+
+        .analytics-table thead th:first-child {
+            background: #f0f2ff;
+        }
+
+        .analytics-table tbody tr:hover td {
+            background: #f8f9ff;
+        }
+
+        .analytics-table tbody tr:hover td:first-child {
+            background: #f8f9ff;
+        }
+
+        .analytics-table .total-row td {
+            font-weight: 700;
+            border-top: 2px solid #d0d4ff;
+            background: #f0f2ff;
+            color: #333;
+        }
+
+        .analytics-table .total-row td:first-child {
+            background: #f0f2ff;
+        }
+
+        .analytics-table .col-total {
+            font-weight: 700;
+            color: #667eea;
+            border-left: 2px solid #d0d4ff;
+        }
+
+        .analytics-table thead th.col-total {
+            border-left: 2px solid #d0d4ff;
+        }
+
+        .analytics-no-data {
+            text-align: center;
+            color: #999;
+            padding: 24px 0;
+            font-style: italic;
+        }
     </style>
 </head>
 <body>
@@ -583,6 +693,12 @@
             </div>
         </div>
 
+        <div class="view-tabs" role="tablist">
+            <button class="view-tab active" id="tabExpenses" role="tab" aria-selected="true" aria-controls="expensesView">Expenses</button>
+            <button class="view-tab" id="tabAnalytics" role="tab" aria-selected="false" aria-controls="analyticsView">Analytics</button>
+        </div>
+
+        <div id="expensesView">
         <div class="section-header">
             <h2>Recent Expenses</h2>
             <div class="export-dropdown">
@@ -617,6 +733,13 @@
         <ul class="expenses-list" id="expensesList">
             <li class="no-expenses" id="noExpenses">No expenses yet. Add your first one above!</li>
         </ul>
+        </div><!-- /#expensesView -->
+
+        <div id="analyticsView">
+            <div class="analytics-table-wrap" id="analyticsTableWrap">
+                <p class="analytics-no-data" id="analyticsNoData">No expenses yet. Add some to see analytics.</p>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -1091,6 +1214,158 @@
                 el.className = 'message';
             }, 5000);
         }
+
+        // ── Analytics ────────────────────────────────────────────────────────
+        // Map "YYYY-MM" key -> human-readable label, e.g. "Apr 2026"
+        function monthLabel(key) {
+            const [y, m] = key.split('-');
+            return new Date(Number(y), Number(m) - 1, 1)
+                .toLocaleDateString(undefined, { month: 'short', year: 'numeric' });
+        }
+
+        async function renderAnalytics() {
+            const expenses = await getAllExpenses(db);
+            const wrap = document.getElementById('analyticsTableWrap');
+            const noData = document.getElementById('analyticsNoData');
+
+            if (expenses.length === 0) {
+                noData.style.display = 'block';
+                const existing = wrap.querySelector('table');
+                if (existing) existing.remove();
+                return;
+            }
+            noData.style.display = 'none';
+
+            // Collect unique year-month keys, newest first
+            const monthSet = new Set();
+            expenses.forEach(e => {
+                const d = new Date(e.timestamp);
+                monthSet.add(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
+            });
+            const months = Array.from(monthSet).sort().reverse();
+
+            // Build category list: known categories that appear in data + "Uncategorized"
+            const usedCatValues = new Set(expenses.map(e => e.category || ''));
+            const catRows = CATEGORIES
+                .filter(c => usedCatValues.has(c.value))
+                .map(c => ({ key: c.value, label: `${c.icon} ${c.label}` }));
+            if (usedCatValues.has('')) {
+                catRows.push({ key: '', label: '— Uncategorized' });
+            }
+
+            // Aggregate: totals[catKey][monthKey] = sum
+            // Only categories present in catRows are tracked; any unknown legacy
+            // category values (not in CATEGORIES) are intentionally excluded.
+            const totals = {};
+            catRows.forEach(c => { totals[c.key] = {}; });
+            expenses.forEach(e => {
+                const catKey = e.category || '';
+                if (totals[catKey] === undefined) return;
+                const d = new Date(e.timestamp);
+                const mk = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+                totals[catKey][mk] = (totals[catKey][mk] || 0) + parseFloat(e.amount);
+            });
+
+            // Build table
+            const table = document.createElement('table');
+            table.className = 'analytics-table';
+            table.setAttribute('role', 'table');
+
+            // Header row
+            const thead = document.createElement('thead');
+            const headerRow = document.createElement('tr');
+            const thCat = document.createElement('th');
+            thCat.textContent = 'Category';
+            thCat.setAttribute('scope', 'col');
+            headerRow.appendChild(thCat);
+            months.forEach(mk => {
+                const th = document.createElement('th');
+                th.textContent = monthLabel(mk);
+                th.setAttribute('scope', 'col');
+                headerRow.appendChild(th);
+            });
+            const thTotal = document.createElement('th');
+            thTotal.textContent = 'Total';
+            thTotal.className = 'col-total';
+            thTotal.setAttribute('scope', 'col');
+            headerRow.appendChild(thTotal);
+            thead.appendChild(headerRow);
+            table.appendChild(thead);
+
+            // Body rows
+            const tbody = document.createElement('tbody');
+            const monthColTotals = {};
+            months.forEach(mk => { monthColTotals[mk] = 0; });
+            let grandTotal = 0;
+
+            catRows.forEach(cat => {
+                const tr = document.createElement('tr');
+                const tdName = document.createElement('td');
+                tdName.textContent = cat.label;
+                tr.appendChild(tdName);
+
+                let rowTotal = 0;
+                months.forEach(mk => {
+                    const val = totals[cat.key][mk] || 0;
+                    const td = document.createElement('td');
+                    td.textContent = val > 0 ? `$${val.toFixed(2)}` : '—';
+                    tr.appendChild(td);
+                    monthColTotals[mk] += val;
+                    rowTotal += val;
+                });
+                grandTotal += rowTotal;
+
+                const tdRowTotal = document.createElement('td');
+                tdRowTotal.textContent = `$${rowTotal.toFixed(2)}`;
+                tdRowTotal.className = 'col-total';
+                tr.appendChild(tdRowTotal);
+
+                tbody.appendChild(tr);
+            });
+
+            // Totals row
+            const trTotal = document.createElement('tr');
+            trTotal.className = 'total-row';
+            const tdTotalLabel = document.createElement('td');
+            tdTotalLabel.textContent = 'Total';
+            trTotal.appendChild(tdTotalLabel);
+            months.forEach(mk => {
+                const td = document.createElement('td');
+                td.textContent = `$${monthColTotals[mk].toFixed(2)}`;
+                trTotal.appendChild(td);
+            });
+            const tdGrand = document.createElement('td');
+            tdGrand.textContent = `$${grandTotal.toFixed(2)}`;
+            tdGrand.className = 'col-total';
+            trTotal.appendChild(tdGrand);
+            tbody.appendChild(trTotal);
+
+            table.appendChild(tbody);
+
+            const existing = wrap.querySelector('table');
+            if (existing) existing.remove();
+            wrap.appendChild(table);
+        }
+
+        // ── Tab switching ────────────────────────────────────────────────────
+        document.getElementById('tabExpenses').addEventListener('click', () => {
+            document.getElementById('tabExpenses').classList.add('active');
+            document.getElementById('tabExpenses').setAttribute('aria-selected', 'true');
+            document.getElementById('tabAnalytics').classList.remove('active');
+            document.getElementById('tabAnalytics').setAttribute('aria-selected', 'false');
+            document.getElementById('expensesView').style.display = '';
+            document.getElementById('analyticsView').style.display = 'none';
+        });
+
+        document.getElementById('tabAnalytics').addEventListener('click', async () => {
+            document.getElementById('tabAnalytics').classList.add('active');
+            document.getElementById('tabAnalytics').setAttribute('aria-selected', 'true');
+            document.getElementById('tabExpenses').classList.remove('active');
+            document.getElementById('tabExpenses').setAttribute('aria-selected', 'false');
+            document.getElementById('expensesView').style.display = 'none';
+            document.getElementById('analyticsView').style.display = '';
+            await renderAnalytics();
+        });
 
         // ── Bootstrap ────────────────────────────────────────────────────────
         init().catch(err => {
