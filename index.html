@@ -607,6 +607,17 @@
             background: #f0f2ff;
         }
 
+        .analytics-table .vacation-row td {
+            font-weight: 600;
+            border-top: 2px solid #f6a623;
+            background: #fff8e7;
+            color: #b36200;
+        }
+
+        .analytics-table .vacation-row td:first-child {
+            background: #fff8e7;
+        }
+
         .analytics-table .col-total {
             font-weight: 700;
             color: #667eea;
@@ -1266,6 +1277,20 @@
                 totals[catKey][mk] = (totals[catKey][mk] || 0) + parseFloat(e.amount);
             });
 
+            // Aggregate vacation totals by month
+            const vacationTotals = {};
+            expenses.forEach(e => {
+                if (!e.vacation) return;
+                const d = new Date(e.timestamp);
+                const mk = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+                vacationTotals[mk] = (vacationTotals[mk] || 0) + parseFloat(e.amount);
+            });
+            const hasVacation = Object.keys(vacationTotals).length > 0;
+
+            // Sort category rows by previous month amount descending
+            const prevMonth = months[1] || months[0];
+            catRows.sort((a, b) => (totals[b.key][prevMonth] || 0) - (totals[a.key][prevMonth] || 0));
+
             // Build table
             const table = document.createElement('table');
             table.className = 'analytics-table';
@@ -1322,6 +1347,28 @@
 
                 tbody.appendChild(tr);
             });
+
+            // Vacation row (only if any vacation expenses exist)
+            if (hasVacation) {
+                const trVacation = document.createElement('tr');
+                trVacation.className = 'vacation-row';
+                const tdVacationLabel = document.createElement('td');
+                tdVacationLabel.textContent = '🏖️ Vacation';
+                trVacation.appendChild(tdVacationLabel);
+                let vacationRowTotal = 0;
+                months.forEach(mk => {
+                    const val = vacationTotals[mk] || 0;
+                    const td = document.createElement('td');
+                    td.textContent = val > 0 ? `$${val.toFixed(2)}` : '—';
+                    trVacation.appendChild(td);
+                    vacationRowTotal += val;
+                });
+                const tdVacationTotal = document.createElement('td');
+                tdVacationTotal.textContent = `$${vacationRowTotal.toFixed(2)}`;
+                tdVacationTotal.className = 'col-total';
+                trVacation.appendChild(tdVacationTotal);
+                tbody.appendChild(trVacation);
+            }
 
             // Totals row
             const trTotal = document.createElement('tr');
