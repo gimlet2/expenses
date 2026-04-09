@@ -634,11 +634,318 @@
             padding: 24px 0;
             font-style: italic;
         }
+
+        /* ── Header row ─────────────────────────────────────────────────────── */
+        .header-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            position: relative;
+        }
+
+        .header-row h1 {
+            margin-bottom: 0;
+        }
+
+        .settings-btn {
+            background: none;
+            border: none;
+            font-size: 1.4em;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 4px;
+            color: #667eea;
+            transition: background 0.2s;
+            line-height: 1;
+            position: absolute;
+            right: 0;
+        }
+
+        .settings-btn:hover {
+            background: #f0f2ff;
+        }
+
+        /* ── Settings modal ─────────────────────────────────────────────────── */
+        .modal-settings {
+            width: 420px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .settings-section {
+            margin-bottom: 24px;
+        }
+
+        .settings-section h4 {
+            font-size: 14px;
+            font-weight: 600;
+            color: #555;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 12px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .currency-row {
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+        }
+
+        .currency-row .form-group {
+            margin-bottom: 0;
+            flex: 1;
+        }
+
+        .currency-row .form-group label {
+            font-size: 13px;
+        }
+
+        .currency-row input {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .currency-row input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn-sm {
+            font-size: 12px;
+            padding: 4px 8px;
+            min-height: unset;
+            border-radius: 3px;
+        }
+
+        .btn-warning {
+            background: #f6a623;
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background: #e09520;
+        }
+
+        .settings-cat-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 4px;
+            border-bottom: 1px solid #f5f5f5;
+        }
+
+        .settings-cat-item:last-child {
+            border-bottom: none;
+        }
+
+        .settings-cat-icon {
+            font-size: 16px;
+            width: 24px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .settings-cat-label {
+            flex: 1;
+            font-size: 14px;
+            color: #333;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .settings-cat-actions {
+            display: flex;
+            gap: 4px;
+            flex-shrink: 0;
+        }
+
+        .settings-cat-edit-row {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            width: 100%;
+        }
+
+        .settings-cat-edit-row input[type="text"] {
+            padding: 4px 8px;
+            font-size: 13px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+        }
+
+        .settings-cat-edit-row input.cat-icon-input {
+            width: 52px;
+            flex-shrink: 0;
+        }
+
+        .settings-cat-edit-row input.cat-label-input {
+            flex: 1;
+        }
+
+        .add-category-row {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #eee;
+        }
+
+        .add-category-row input[type="text"] {
+            padding: 6px 8px;
+            font-size: 13px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+        }
+
+        .add-category-row input.cat-icon-input {
+            width: 56px;
+            flex-shrink: 0;
+        }
+
+        .add-category-row input.cat-label-input {
+            flex: 1;
+        }
+
+        /* ── Filter toolbar ─────────────────────────────────────────────────── */
+        .filter-toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+            padding: 10px 12px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            margin-bottom: 12px;
+        }
+
+        .filter-toolbar select,
+        .filter-toolbar input[type="date"] {
+            padding: 6px 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 13px;
+            background: white;
+            min-height: unset;
+            width: auto;
+        }
+
+        .filter-toolbar select:focus,
+        .filter-toolbar input[type="date"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .filter-vacation-label {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 13px;
+            color: #555;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .filter-vacation-label input[type="checkbox"] {
+            width: 15px;
+            height: 15px;
+            cursor: pointer;
+            accent-color: #f6a623;
+        }
+
+        .filter-date-group {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 13px;
+            color: #888;
+        }
+
+        .btn-clear-filters {
+            background: #e9ecef;
+            color: #555;
+            border: none;
+            border-radius: 4px;
+            font-size: 12px;
+            padding: 5px 10px;
+            cursor: pointer;
+            min-height: unset;
+        }
+
+        .btn-clear-filters:hover {
+            background: #dee2e6;
+        }
+
+        .filter-active-badge {
+            font-size: 11px;
+            background: #667eea;
+            color: white;
+            border-radius: 10px;
+            padding: 1px 7px;
+        }
+
+        /* ── Inline delete confirm ──────────────────────────────────────────── */
+        .delete-confirm {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 12px;
+            color: #555;
+            white-space: nowrap;
+        }
+
+        /* ── Optional hint ──────────────────────────────────────────────────── */
+        .optional-hint {
+            font-size: 12px;
+            font-weight: 400;
+            color: #888;
+        }
+
+        /* ── Date input ─────────────────────────────────────────────────────── */
+        input[type="date"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+            -webkit-appearance: none;
+            background: white;
+        }
+
+        input[type="date"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        @media (max-width: 640px) {
+            input[type="date"] {
+                font-size: 16px;
+                min-height: 44px;
+            }
+        }
+
+        .modal input[type="date"] {
+            font-size: 15px;
+            padding: 10px 12px;
+            min-height: unset;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>💰 Expense Tracker</h1>
+        <div class="header-row">
+            <h1>💰 Expense Tracker</h1>
+            <button class="settings-btn" id="settingsBtn" aria-label="Settings" title="Settings">⚙️</button>
+        </div>
         <p class="subtitle">Track your expenses locally — no account needed</p>
 
         <div id="message" class="message"></div>
@@ -647,7 +954,7 @@
 
         <form id="expenseForm">
             <div class="form-group">
-                <label for="amount">Amount ($)</label>
+                <label for="amount" id="amountLabel">Amount ($)</label>
                 <input type="number" id="amount" name="amount" step="0.01" min="0.01" required placeholder="0.00">
             </div>
 
@@ -657,24 +964,15 @@
             </div>
 
             <div class="form-group">
-                <label for="category">Category (optional)</label>
+                <label for="category">Category <span class="optional-hint">(optional)</span></label>
                 <select id="category" name="category">
                     <option value="">— No category —</option>
-                    <option value="coffee">☕ Coffee</option>
-                    <option value="restaurant">🍽️ Restaurant</option>
-                    <option value="groceries">🛒 Groceries</option>
-                    <option value="transport">🚗 Transport</option>
-                    <option value="healthcare">🏥 Healthcare</option>
-                    <option value="housing">🏠 Housing</option>
-                    <option value="utilities">💡 Utilities</option>
-                    <option value="entertainment">🎬 Entertainment</option>
-                    <option value="clothing">👗 Clothing</option>
-                    <option value="drogery">🧴 Drogery</option>
-                    <option value="education">📚 Education</option>
-                    <option value="shopping">🛍️ Shopping</option>
-                    <option value="sport">🏋️ Sport</option>
-                    <option value="other">📌 Other</option>
                 </select>
+            </div>
+
+            <div class="form-group">
+                <label for="expenseDate">Date <span class="optional-hint">(optional — leave blank for today)</span></label>
+                <input type="date" id="expenseDate" name="expenseDate">
             </div>
 
             <div class="location-group">
@@ -723,6 +1021,41 @@
             </div>
         </div>
 
+        <div class="modal-overlay" id="settingsModal">
+            <div class="modal modal-settings">
+                <h3>⚙️ Settings</h3>
+
+                <div class="settings-section">
+                    <h4>Currency</h4>
+                    <div class="currency-row">
+                        <div class="form-group">
+                            <label for="currencySymbol">Symbol</label>
+                            <input type="text" id="currencySymbol" maxlength="5" placeholder="$" value="$">
+                        </div>
+                        <div class="form-group">
+                            <label for="currencyCode">Code</label>
+                            <input type="text" id="currencyCode" maxlength="10" placeholder="USD" value="USD">
+                        </div>
+                        <button class="btn btn-primary" id="saveCurrencyBtn" style="flex-shrink:0;width:auto;padding:8px 14px">Save</button>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h4>Categories</h4>
+                    <div id="settingsCategoryList"></div>
+                    <div class="add-category-row">
+                        <input type="text" class="cat-icon-input" id="newCatIcon" placeholder="icon" maxlength="6" aria-label="New category icon">
+                        <input type="text" class="cat-label-input" id="newCatLabel" placeholder="Label" maxlength="40" aria-label="New category label">
+                        <button class="btn btn-primary btn-sm" id="addCategoryBtn" style="width:auto;padding:6px 12px">Add</button>
+                    </div>
+                </div>
+
+                <div class="modal-actions">
+                    <button class="btn btn-secondary" id="closeSettingsBtn">Close</button>
+                </div>
+            </div>
+        </div>
+
         <div class="modal-overlay" id="customRangeModal">
             <div class="modal">
                 <h3>Custom Timeframe</h3>
@@ -741,6 +1074,20 @@
             </div>
         </div>
 
+        <div class="filter-toolbar" id="filterToolbar">
+            <select id="filterCategory" aria-label="Filter by category">
+                <option value="">All categories</option>
+            </select>
+            <label class="filter-vacation-label">
+                <input type="checkbox" id="filterVacation"> 🏖️ Vacation only
+            </label>
+            <div class="filter-date-group">
+                From <input type="date" id="filterFrom" aria-label="Filter from date">
+                To <input type="date" id="filterTo" aria-label="Filter to date">
+            </div>
+            <button class="btn-clear-filters" id="clearFiltersBtn" style="display:none">✕ Clear filters</button>
+        </div>
+
         <ul class="expenses-list" id="expensesList">
             <li class="no-expenses" id="noExpenses">No expenses yet. Add your first one above!</li>
         </ul>
@@ -756,11 +1103,12 @@
     <script>
         // ── IndexedDB setup ──────────────────────────────────────────────────
         const DB_NAME = 'expenseTrackerDB';
-        const DB_VERSION = 1;
+        const DB_VERSION = 2;
         const STORE_NAME = 'expenses';
+        const CAT_STORE_NAME = 'categories';
 
-        // ── Categories ───────────────────────────────────────────────────────
-        const CATEGORIES = [
+        // ── Default categories (used to pre-populate on first run) ───────────
+        const DEFAULT_CATEGORIES = [
             { value: 'coffee',        label: 'Coffee',        icon: '☕' },
             { value: 'restaurant',    label: 'Restaurant',    icon: '🍽️' },
             { value: 'groceries',     label: 'Groceries',     icon: '🛒' },
@@ -777,10 +1125,42 @@
             { value: 'other',         label: 'Other',         icon: '📌' },
         ];
 
+        // Runtime category list (loaded from IndexedDB)
+        let categories = [];
+
         function getCategoryEntry(value) {
-            return CATEGORIES.find(c => c.value === value) || null;
+            return categories.find(c => c.value === value) || null;
         }
 
+        // ── Currency helpers (localStorage) ──────────────────────────────────
+        function getCurrency() {
+            try {
+                const raw = localStorage.getItem('expenseCurrency');
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (parsed && parsed.symbol && parsed.code) return parsed;
+                }
+            } catch (_) { /* ignore */ }
+            return { symbol: '$', code: 'USD' };
+        }
+
+        function saveCurrency(symbol, code) {
+            localStorage.setItem('expenseCurrency', JSON.stringify({ symbol, code }));
+        }
+
+        function formatAmount(amount) {
+            const { symbol } = getCurrency();
+            return `${symbol}${parseFloat(amount).toFixed(2)}`;
+        }
+
+        function updateCurrencyUI() {
+            const { symbol, code } = getCurrency();
+            document.getElementById('amountLabel').textContent = `Amount (${symbol})`;
+            document.getElementById('currencySymbol').value = symbol;
+            document.getElementById('currencyCode').value = code;
+        }
+
+        // ── IndexedDB open ───────────────────────────────────────────────────
         function openDB() {
             return new Promise((resolve, reject) => {
                 const request = indexedDB.open(DB_NAME, DB_VERSION);
@@ -791,6 +1171,9 @@
                         const store = db.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true });
                         store.createIndex('timestamp', 'timestamp', { unique: false });
                     }
+                    if (!db.objectStoreNames.contains(CAT_STORE_NAME)) {
+                        db.createObjectStore(CAT_STORE_NAME, { keyPath: 'id', autoIncrement: true });
+                    }
                 };
 
                 request.onsuccess = (event) => resolve(event.target.result);
@@ -798,6 +1181,7 @@
             });
         }
 
+        // ── Expense CRUD ─────────────────────────────────────────────────────
         function addExpenseToDB(db, expense) {
             return new Promise((resolve, reject) => {
                 const tx = db.transaction(STORE_NAME, 'readwrite');
@@ -838,6 +1222,109 @@
             });
         }
 
+        // ── Category CRUD ────────────────────────────────────────────────────
+        function getAllCategoriesFromDB(db) {
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction(CAT_STORE_NAME, 'readonly');
+                const store = tx.objectStore(CAT_STORE_NAME);
+                const request = store.getAll();
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = (event) => reject(event.target.error);
+            });
+        }
+
+        function addCategoryToDB(db, cat) {
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction(CAT_STORE_NAME, 'readwrite');
+                const store = tx.objectStore(CAT_STORE_NAME);
+                const request = store.add(cat);
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = (event) => reject(event.target.error);
+            });
+        }
+
+        function updateCategoryInDB(db, cat) {
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction(CAT_STORE_NAME, 'readwrite');
+                const store = tx.objectStore(CAT_STORE_NAME);
+                const request = store.put(cat);
+                request.onsuccess = () => resolve();
+                request.onerror = (event) => reject(event.target.error);
+            });
+        }
+
+        function deleteCategoryFromDB(db, id) {
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction(CAT_STORE_NAME, 'readwrite');
+                const store = tx.objectStore(CAT_STORE_NAME);
+                const request = store.delete(id);
+                request.onsuccess = () => resolve();
+                request.onerror = (event) => reject(event.target.error);
+            });
+        }
+
+        async function initializeDefaultCategories(db) {
+            const existing = await getAllCategoriesFromDB(db);
+            if (existing.length === 0) {
+                for (const cat of DEFAULT_CATEGORIES) {
+                    await addCategoryToDB(db, { value: cat.value, label: cat.label, icon: cat.icon });
+                }
+            }
+        }
+
+        async function loadCategories(db) {
+            categories = await getAllCategoriesFromDB(db);
+        }
+
+        function renderCategorySelect() {
+            const sel = document.getElementById('category');
+            const current = sel.value;
+            sel.innerHTML = '<option value="">— No category —</option>';
+            categories.forEach(cat => {
+                const opt = document.createElement('option');
+                opt.value = cat.value;
+                opt.textContent = `${cat.icon} ${cat.label}`;
+                sel.appendChild(opt);
+            });
+            sel.value = current;
+        }
+
+        function renderFilterCategoryOptions() {
+            const sel = document.getElementById('filterCategory');
+            const current = sel.value;
+            sel.innerHTML = '<option value="">All categories</option>';
+            categories.forEach(cat => {
+                const opt = document.createElement('option');
+                opt.value = cat.value;
+                opt.textContent = `${cat.icon} ${cat.label}`;
+                sel.appendChild(opt);
+            });
+            sel.value = current || '';
+        }
+
+        function renderSettingsCategoryList() {
+            const container = document.getElementById('settingsCategoryList');
+            container.innerHTML = '';
+            if (categories.length === 0) {
+                container.innerHTML = '<p style="color:#999;font-size:13px;padding:8px 0">No categories yet.</p>';
+                return;
+            }
+            categories.forEach(cat => {
+                const row = document.createElement('div');
+                row.className = 'settings-cat-item';
+                row.dataset.id = cat.id;
+                row.innerHTML = `
+                    <span class="settings-cat-icon">${escapeHtml(cat.icon)}</span>
+                    <span class="settings-cat-label">${escapeHtml(cat.label)}</span>
+                    <div class="settings-cat-actions">
+                        <button class="btn btn-warning btn-sm cat-edit-btn" data-id="${cat.id}" aria-label="Rename category">✏️</button>
+                        <button class="btn btn-danger btn-sm cat-delete-btn" data-id="${cat.id}" aria-label="Delete category">✕</button>
+                    </div>
+                `;
+                container.appendChild(row);
+            });
+        }
+
         // ── Geolocation helper ───────────────────────────────────────────────
         function getCurrentLocation() {
             return new Promise((resolve, reject) => {
@@ -872,9 +1359,51 @@
         let editingId = null;
         let currentEditExpense = null;
 
+        // Filter state
+        let filterCategory = '';
+        let filterVacation = false;
+        let filterFrom = '';
+        let filterTo = '';
+
         async function init() {
             db = await openDB();
+            await initializeDefaultCategories(db);
+            await loadCategories(db);
+            renderCategorySelect();
+            renderFilterCategoryOptions();
+            updateCurrencyUI();
             await renderExpenses();
+        }
+
+        // ── Filter helpers ───────────────────────────────────────────────────
+        function getFilteredExpenses(expenses) {
+            let result = expenses.slice().reverse(); // newest first
+
+            if (filterCategory) {
+                result = result.filter(e => e.category === filterCategory);
+            }
+            if (filterVacation) {
+                result = result.filter(e => e.vacation === true);
+            }
+            if (filterFrom) {
+                const from = new Date(filterFrom).getTime();
+                result = result.filter(e => e.timestamp >= from);
+            }
+            if (filterTo) {
+                const to = new Date(filterTo);
+                to.setHours(23, 59, 59, 999);
+                result = result.filter(e => e.timestamp <= to.getTime());
+            }
+            return result;
+        }
+
+        function isFilterActive() {
+            return filterCategory !== '' || filterVacation || filterFrom !== '' || filterTo !== '';
+        }
+
+        function updateClearButton() {
+            const btn = document.getElementById('clearFiltersBtn');
+            btn.style.display = isFilterActive() ? '' : 'none';
         }
 
         // ── Monthly summary ──────────────────────────────────────────────────
@@ -899,8 +1428,8 @@
                 return acc;
             }, { currentTotal: 0, previousTotal: 0 });
 
-            document.getElementById('currentMonthTotal').textContent = `$${currentTotal.toFixed(2)}`;
-            document.getElementById('previousMonthTotal').textContent = `$${previousTotal.toFixed(2)}`;
+            document.getElementById('currentMonthTotal').textContent = formatAmount(currentTotal);
+            document.getElementById('previousMonthTotal').textContent = formatAmount(previousTotal);
         }
 
         // ── Rendering ────────────────────────────────────────────────────────
@@ -914,15 +1443,19 @@
             // Clear existing expense items (keep the noExpenses placeholder)
             Array.from(list.querySelectorAll('.expense-item')).forEach(el => el.remove());
 
-            if (expenses.length === 0) {
+            const filtered = getFilteredExpenses(expenses);
+
+            if (filtered.length === 0) {
                 noExpenses.style.display = 'block';
+                noExpenses.textContent = isFilterActive()
+                    ? 'No expenses match the current filters.'
+                    : 'No expenses yet. Add your first one above!';
                 return;
             }
 
             noExpenses.style.display = 'none';
 
-            // Show newest first
-            expenses.slice().reverse().forEach(expense => {
+            filtered.forEach(expense => {
                 const li = document.createElement('li');
                 li.className = 'expense-item' + (expense.vacation === true ? ' vacation' : '');
                 li.dataset.id = expense.id;
@@ -950,9 +1483,14 @@
                             ? `<div class="expense-item-location"><a href="https://www.openstreetmap.org/?mlat=${expense.latitude}&mlon=${expense.longitude}&zoom=16" target="_blank" rel="noopener noreferrer">📍 ${expense.latitude.toFixed(4)}, ${expense.longitude.toFixed(4)}</a></div>`
                             : ''}
                     </div>
-                    <span class="expense-amount">$${parseFloat(expense.amount).toFixed(2)}</span>
+                    <span class="expense-amount">${formatAmount(expense.amount)}</span>
                     <button class="btn btn-edit edit-btn" data-id="${expense.id}" aria-label="Edit expense">✏️</button>
                     <button class="btn btn-danger delete-btn" data-id="${expense.id}" aria-label="Delete expense">✕</button>
+                    <span class="delete-confirm" data-id="${expense.id}" style="display:none">
+                        Delete?&nbsp;
+                        <button class="btn btn-danger btn-sm confirm-yes-btn" data-id="${expense.id}">Yes</button>
+                        <button class="btn btn-secondary btn-sm confirm-no-btn" data-id="${expense.id}">No</button>
+                    </span>
                 `;
 
                 list.appendChild(li);
@@ -973,10 +1511,22 @@
             const item = document.getElementById('item').value.trim();
             const category = document.getElementById('category').value;
             const vacation = document.getElementById('vacation').checked;
+            const expenseDateVal = document.getElementById('expenseDate').value;
 
             if (!amount || !item) {
                 showMessage('Both amount and item are required.', 'error');
                 return;
+            }
+
+            // Determine timestamp
+            let timestamp;
+            if (expenseDateVal) {
+                // Parse YYYY-MM-DD as local date, using noon to avoid timezone edge cases.
+                // The date input always yields exactly 10 characters in YYYY-MM-DD format.
+                const dateMs = new Date(expenseDateVal + 'T12:00:00').getTime();
+                timestamp = Number.isFinite(dateMs) ? dateMs : Date.now();
+            } else {
+                timestamp = Date.now();
             }
 
             const submitBtn = document.getElementById('submitBtn');
@@ -996,12 +1546,13 @@
 
             try {
                 if (editingId !== null) {
-                    // Build updated expense preserving original id and timestamp
+                    // Build updated expense preserving original id; use new timestamp if date was changed
                     const updated = {
                         ...currentEditExpense,
                         amount: parseFloat(amount),
                         item,
                         vacation,
+                        timestamp,
                     };
                     if (category) {
                         updated.category = category;
@@ -1021,7 +1572,7 @@
                     const expense = {
                         amount: parseFloat(amount),
                         item,
-                        timestamp: Date.now(),
+                        timestamp,
                         vacation,
                     };
                     if (category) expense.category = category;
@@ -1053,6 +1604,14 @@
             document.getElementById('category').value = expense.category || '';
             document.getElementById('captureLocation').checked = false;
             document.getElementById('vacation').checked = !!expense.vacation;
+
+            // Populate date picker
+            const d = new Date(expense.timestamp);
+            const yyyy = d.getFullYear();
+            const mm = String(d.getMonth() + 1).padStart(2, '0');
+            const dd = String(d.getDate()).padStart(2, '0');
+            document.getElementById('expenseDate').value = `${yyyy}-${mm}-${dd}`;
+
             document.getElementById('submitBtn').textContent = 'Update Expense';
             document.getElementById('cancelEditBtn').style.display = '';
             document.getElementById('editBanner').classList.add('show');
@@ -1072,9 +1631,33 @@
 
         // ── Delete / Edit expense ────────────────────────────────────────────
         document.getElementById('expensesList').addEventListener('click', async (e) => {
+            // Delete button → show inline confirm
             const deleteBtn = e.target.closest('.delete-btn');
             if (deleteBtn) {
-                const id = parseInt(deleteBtn.dataset.id, 10);
+                const id = deleteBtn.dataset.id;
+                const li = deleteBtn.closest('li');
+                deleteBtn.style.display = 'none';
+                const confirm = li.querySelector(`.delete-confirm[data-id="${id}"]`);
+                if (confirm) confirm.style.display = '';
+                return;
+            }
+
+            // Confirm No → restore delete button
+            const noBtn = e.target.closest('.confirm-no-btn');
+            if (noBtn) {
+                const id = noBtn.dataset.id;
+                const li = noBtn.closest('li');
+                const confirm = li.querySelector(`.delete-confirm[data-id="${id}"]`);
+                if (confirm) confirm.style.display = 'none';
+                const delBtn = li.querySelector(`.delete-btn[data-id="${id}"]`);
+                if (delBtn) delBtn.style.display = '';
+                return;
+            }
+
+            // Confirm Yes → delete
+            const yesBtn = e.target.closest('.confirm-yes-btn');
+            if (yesBtn) {
+                const id = parseInt(yesBtn.dataset.id, 10);
                 if (editingId === id) cancelEdit();
                 try {
                     await deleteExpenseFromDB(db, id);
@@ -1097,7 +1680,8 @@
 
         // ── CSV Export ───────────────────────────────────────────────────────
         function downloadCSV(expenses, filename) {
-            const rows = [['Date', 'Item', 'Category', 'Amount', 'Vacation', 'Latitude', 'Longitude']];
+            const { code: currencyCode } = getCurrency();
+            const rows = [['Date', 'Item', 'Category', `Amount (${currencyCode})`, 'Vacation', 'Latitude', 'Longitude']];
             expenses.forEach(expense => {
                 const date = new Date(expense.timestamp).toLocaleString();
                 const cat = getCategoryEntry(expense.category);
@@ -1257,7 +1841,7 @@
 
             // Build category list: known categories that appear in data + "Uncategorized"
             const usedCatValues = new Set(expenses.map(e => e.category || ''));
-            const catRows = CATEGORIES
+            const catRows = categories
                 .filter(c => usedCatValues.has(c.value))
                 .map(c => ({ key: c.value, label: `${c.icon} ${c.label}` }));
             if (usedCatValues.has('')) {
@@ -1265,8 +1849,6 @@
             }
 
             // Aggregate: totals[catKey][monthKey] = sum
-            // Only categories present in catRows are tracked; any unknown legacy
-            // category values (not in CATEGORIES) are intentionally excluded.
             const totals = {};
             catRows.forEach(c => { totals[c.key] = {}; });
             expenses.forEach(e => {
@@ -1333,7 +1915,7 @@
                 months.forEach(mk => {
                     const val = totals[cat.key][mk] || 0;
                     const td = document.createElement('td');
-                    td.textContent = val > 0 ? `$${val.toFixed(2)}` : '—';
+                    td.textContent = val > 0 ? formatAmount(val) : '—';
                     tr.appendChild(td);
                     monthColTotals[mk] += val;
                     rowTotal += val;
@@ -1341,7 +1923,7 @@
                 grandTotal += rowTotal;
 
                 const tdRowTotal = document.createElement('td');
-                tdRowTotal.textContent = `$${rowTotal.toFixed(2)}`;
+                tdRowTotal.textContent = formatAmount(rowTotal);
                 tdRowTotal.className = 'col-total';
                 tr.appendChild(tdRowTotal);
 
@@ -1359,12 +1941,12 @@
                 months.forEach(mk => {
                     const val = vacationTotals[mk] || 0;
                     const td = document.createElement('td');
-                    td.textContent = val > 0 ? `$${val.toFixed(2)}` : '—';
+                    td.textContent = val > 0 ? formatAmount(val) : '—';
                     trVacation.appendChild(td);
                     vacationRowTotal += val;
                 });
                 const tdVacationTotal = document.createElement('td');
-                tdVacationTotal.textContent = `$${vacationRowTotal.toFixed(2)}`;
+                tdVacationTotal.textContent = formatAmount(vacationRowTotal);
                 tdVacationTotal.className = 'col-total';
                 trVacation.appendChild(tdVacationTotal);
                 tbody.appendChild(trVacation);
@@ -1378,11 +1960,11 @@
             trTotal.appendChild(tdTotalLabel);
             months.forEach(mk => {
                 const td = document.createElement('td');
-                td.textContent = `$${monthColTotals[mk].toFixed(2)}`;
+                td.textContent = formatAmount(monthColTotals[mk]);
                 trTotal.appendChild(td);
             });
             const tdGrand = document.createElement('td');
-            tdGrand.textContent = `$${grandTotal.toFixed(2)}`;
+            tdGrand.textContent = formatAmount(grandTotal);
             tdGrand.className = 'col-total';
             trTotal.appendChild(tdGrand);
             tbody.appendChild(trTotal);
@@ -1412,6 +1994,190 @@
             document.getElementById('expensesView').style.display = 'none';
             document.getElementById('analyticsView').style.display = 'block';
             await renderAnalytics();
+        });
+
+        // ── Settings modal ───────────────────────────────────────────────────
+        document.getElementById('settingsBtn').addEventListener('click', () => {
+            renderSettingsCategoryList();
+            updateCurrencyUI();
+            document.getElementById('settingsModal').classList.add('open');
+        });
+
+        document.getElementById('closeSettingsBtn').addEventListener('click', () => {
+            document.getElementById('settingsModal').classList.remove('open');
+        });
+
+        document.getElementById('settingsModal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('settingsModal')) {
+                document.getElementById('settingsModal').classList.remove('open');
+            }
+        });
+
+        // Currency save
+        document.getElementById('saveCurrencyBtn').addEventListener('click', () => {
+            const symbol = document.getElementById('currencySymbol').value.trim();
+            const code = document.getElementById('currencyCode').value.trim().toUpperCase();
+            if (!symbol) {
+                showMessage('Currency symbol cannot be empty.', 'error');
+                return;
+            }
+            saveCurrency(symbol, code || 'USD');
+            updateCurrencyUI();
+            renderExpenses();
+            showMessage(`Currency updated to ${symbol} (${code || 'USD'}).`, 'success');
+        });
+
+        // Category list actions (edit / delete / confirm delete)
+        document.getElementById('settingsCategoryList').addEventListener('click', async (e) => {
+            // Edit (rename) button
+            const editBtn = e.target.closest('.cat-edit-btn');
+            if (editBtn) {
+                const id = parseInt(editBtn.dataset.id, 10);
+                const cat = categories.find(c => c.id === id);
+                if (!cat) return;
+                const row = editBtn.closest('.settings-cat-item');
+                row.innerHTML = `
+                    <div class="settings-cat-edit-row">
+                        <input type="text" class="cat-icon-input" value="${escapeHtml(cat.icon)}" maxlength="6" aria-label="Category icon">
+                        <input type="text" class="cat-label-input" value="${escapeHtml(cat.label)}" maxlength="40" aria-label="Category label">
+                        <button class="btn btn-primary btn-sm cat-save-btn" data-id="${id}" style="width:auto;padding:4px 10px">Save</button>
+                        <button class="btn btn-secondary btn-sm cat-cancel-btn" data-id="${id}" style="width:auto;padding:4px 10px">Cancel</button>
+                    </div>
+                `;
+                return;
+            }
+
+            // Save rename
+            const saveBtn = e.target.closest('.cat-save-btn');
+            if (saveBtn) {
+                const id = parseInt(saveBtn.dataset.id, 10);
+                const row = saveBtn.closest('.settings-cat-item');
+                const newIcon = row.querySelector('.cat-icon-input').value.trim();
+                const newLabel = row.querySelector('.cat-label-input').value.trim();
+                if (!newLabel) {
+                    showMessage('Category label cannot be empty.', 'error');
+                    return;
+                }
+                const cat = categories.find(c => c.id === id);
+                if (!cat) return;
+                const updated = { ...cat, icon: newIcon || cat.icon, label: newLabel };
+                await updateCategoryInDB(db, updated);
+                await loadCategories(db);
+                renderCategorySelect();
+                renderFilterCategoryOptions();
+                renderSettingsCategoryList();
+                await renderExpenses();
+                return;
+            }
+
+            // Cancel rename
+            const cancelBtn = e.target.closest('.cat-cancel-btn');
+            if (cancelBtn) {
+                renderSettingsCategoryList();
+                return;
+            }
+
+            // Delete button → show inline confirm
+            const deleteBtn = e.target.closest('.cat-delete-btn');
+            if (deleteBtn) {
+                const id = deleteBtn.dataset.id;
+                const row = deleteBtn.closest('.settings-cat-item');
+                const actionsDiv = row.querySelector('.settings-cat-actions');
+                actionsDiv.innerHTML = `
+                    <span style="font-size:12px;color:#555">Delete?&nbsp;</span>
+                    <button class="btn btn-danger btn-sm cat-confirm-yes" data-id="${id}">Yes</button>
+                    <button class="btn btn-secondary btn-sm cat-confirm-no" data-id="${id}">No</button>
+                `;
+                return;
+            }
+
+            // Confirm No
+            const noBtn = e.target.closest('.cat-confirm-no');
+            if (noBtn) {
+                renderSettingsCategoryList();
+                return;
+            }
+
+            // Confirm Yes → delete
+            const yesBtn = e.target.closest('.cat-confirm-yes');
+            if (yesBtn) {
+                const id = parseInt(yesBtn.dataset.id, 10);
+                await deleteCategoryFromDB(db, id);
+                await loadCategories(db);
+                renderCategorySelect();
+                renderFilterCategoryOptions();
+                renderSettingsCategoryList();
+                await renderExpenses();
+                return;
+            }
+        });
+
+        function generateCategoryValue(label) {
+            const base = label.toLowerCase()
+                .replace(/[^a-z0-9]/g, '_')
+                .replace(/_+/g, '_')
+                .replace(/^_|_$/g, '');
+            return base || ('cat_' + Date.now());
+        }
+
+        // Add new category
+        document.getElementById('addCategoryBtn').addEventListener('click', async () => {
+            const icon = document.getElementById('newCatIcon').value.trim();
+            const label = document.getElementById('newCatLabel').value.trim();
+            if (!label) {
+                showMessage('Please enter a category label.', 'error');
+                return;
+            }
+            let value = generateCategoryValue(label);
+            // Ensure uniqueness
+            if (categories.find(c => c.value === value)) {
+                value = value + '_' + Date.now();
+            }
+            await addCategoryToDB(db, { value, label, icon: icon || '📌' });
+            await loadCategories(db);
+            renderCategorySelect();
+            renderFilterCategoryOptions();
+            renderSettingsCategoryList();
+            document.getElementById('newCatIcon').value = '';
+            document.getElementById('newCatLabel').value = '';
+        });
+
+        // ── Filter toolbar ───────────────────────────────────────────────────
+        document.getElementById('filterCategory').addEventListener('change', async (e) => {
+            filterCategory = e.target.value;
+            updateClearButton();
+            await renderExpenses();
+        });
+
+        document.getElementById('filterVacation').addEventListener('change', async (e) => {
+            filterVacation = e.target.checked;
+            updateClearButton();
+            await renderExpenses();
+        });
+
+        document.getElementById('filterFrom').addEventListener('change', async (e) => {
+            filterFrom = e.target.value;
+            updateClearButton();
+            await renderExpenses();
+        });
+
+        document.getElementById('filterTo').addEventListener('change', async (e) => {
+            filterTo = e.target.value;
+            updateClearButton();
+            await renderExpenses();
+        });
+
+        document.getElementById('clearFiltersBtn').addEventListener('click', async () => {
+            filterCategory = '';
+            filterVacation = false;
+            filterFrom = '';
+            filterTo = '';
+            document.getElementById('filterCategory').value = '';
+            document.getElementById('filterVacation').checked = false;
+            document.getElementById('filterFrom').value = '';
+            document.getElementById('filterTo').value = '';
+            updateClearButton();
+            await renderExpenses();
         });
 
         // ── Bootstrap ────────────────────────────────────────────────────────
