@@ -2404,7 +2404,11 @@
             const fileUrl = settings.url.replace(/\/$/, '') + '/expenses_sync.json';
             const headers = {};
             if (settings.username) {
-                headers['Authorization'] = 'Basic ' + btoa(unescape(encodeURIComponent(settings.username + ':' + (settings.password || ''))));
+                const credentials = Array.from(
+                    new TextEncoder().encode(settings.username + ':' + (settings.password || '')),
+                    b => String.fromCharCode(b)
+                ).join('');
+                headers['Authorization'] = 'Basic ' + btoa(credentials);
             }
             statusEl.textContent = 'Syncing…';
             try {
@@ -2421,7 +2425,8 @@
 
                 // 2. Merge: add remote expenses not already present locally (by timestamp+amount+item)
                 const local = await getAllExpenses(db);
-                const identityKey = e => `${e.timestamp}|${e.amount}|${e.item}`;
+                // Identity key uses JSON.stringify to avoid collisions with items containing separator characters
+                const identityKey = e => JSON.stringify([e.timestamp, e.amount, e.item]);
                 const localKeys = new Set(local.map(identityKey));
                 const toAdd = remoteExpenses
                     .map(r => validateExpenseRaw(r))
@@ -3258,6 +3263,7 @@
                     showMessage('Share link copied to clipboard!', 'success');
                 });
             } else {
+                // Legacy fallback for browsers without clipboard API
                 document.getElementById('shareUrlOutput').select();
                 document.execCommand('copy');
                 showMessage('Share link copied to clipboard!', 'success');
