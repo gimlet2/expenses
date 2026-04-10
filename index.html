@@ -938,6 +938,139 @@
             padding: 10px 12px;
             min-height: unset;
         }
+
+        /* ── Budget progress bar ─────────────────────────────────────────────── */
+        .budget-progress {
+            margin-top: 6px;
+        }
+
+        .budget-bar {
+            height: 6px;
+            background: #e9ecef;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 3px;
+        }
+
+        .budget-bar-fill {
+            height: 100%;
+            background: #667eea;
+            border-radius: 3px;
+            transition: width 0.3s;
+            max-width: 100%;
+        }
+
+        .budget-bar-fill.near-budget {
+            background: #f6a623;
+        }
+
+        .budget-bar-fill.over-budget {
+            background: #dc3545;
+        }
+
+        .budget-label {
+            font-size: 11px;
+            color: #888;
+        }
+
+        /* ── Analytics charts ────────────────────────────────────────────────── */
+        .analytics-charts {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-top: 16px;
+            margin-bottom: 16px;
+        }
+
+        @media (max-width: 560px) {
+            .analytics-charts {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .chart-card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 12px;
+        }
+
+        .chart-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .chart-svg {
+            width: 100%;
+            display: block;
+        }
+
+        .chart-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 8px;
+        }
+
+        .chart-legend-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 11px;
+            color: #555;
+        }
+
+        .chart-legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        /* ── Import/Export toolbar ───────────────────────────────────────────── */
+        .section-header-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .btn-import {
+            background: #e9ecef;
+            color: #555;
+            border: none;
+            border-radius: 4px;
+            font-size: 13px;
+            padding: 7px 12px;
+            cursor: pointer;
+            white-space: nowrap;
+            font-weight: 500;
+            transition: background 0.2s;
+            min-height: unset;
+        }
+
+        .btn-import:hover {
+            background: #dee2e6;
+        }
+
+        /* ── Budget input in settings ────────────────────────────────────────── */
+        .budget-input-row {
+            display: flex;
+            gap: 8px;
+            align-items: flex-end;
+        }
+
+        .budget-input-row .form-group {
+            flex: 1;
+            margin-bottom: 0;
+        }
+
+        .budget-input-row input[type="number"] {
+            padding: 8px 10px;
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
@@ -995,10 +1128,18 @@
             <div class="monthly-summary-card">
                 <div class="summary-label">This month</div>
                 <div class="summary-amount" id="currentMonthTotal">$0.00</div>
+                <div class="budget-progress" id="budgetProgress" style="display:none">
+                    <div class="budget-bar"><div class="budget-bar-fill" id="budgetBarFill"></div></div>
+                    <div class="budget-label" id="budgetLabel"></div>
+                </div>
             </div>
             <div class="monthly-summary-card">
                 <div class="summary-label">Last month</div>
                 <div class="summary-amount" id="previousMonthTotal">$0.00</div>
+            </div>
+            <div class="monthly-summary-card">
+                <div class="summary-label">All time</div>
+                <div class="summary-amount" id="runningTotal">$0.00</div>
             </div>
         </div>
 
@@ -1010,13 +1151,18 @@
         <div id="expensesView">
         <div class="section-header">
             <h2>Recent Expenses</h2>
-            <div class="export-dropdown">
-                <button class="btn btn-export" id="exportBtn" aria-haspopup="true" aria-expanded="false">Export CSV ▾</button>
-                <div class="export-dropdown-menu" id="exportMenu">
-                    <button data-range="current-month">Current month</button>
-                    <button data-range="previous-month">Previous month</button>
-                    <button data-range="all">All records</button>
-                    <button data-range="custom">Custom timeframe…</button>
+            <div class="section-header-actions">
+                <button class="btn btn-import" id="importJsonBtn">Import JSON</button>
+                <input type="file" id="importJsonInput" accept=".json" style="display:none" aria-label="Import JSON file">
+                <div class="export-dropdown">
+                    <button class="btn btn-export" id="exportBtn" aria-haspopup="true" aria-expanded="false">Export ▾</button>
+                    <div class="export-dropdown-menu" id="exportMenu">
+                        <button data-range="current-month">CSV — Current month</button>
+                        <button data-range="previous-month">CSV — Previous month</button>
+                        <button data-range="all">CSV — All records</button>
+                        <button data-range="custom">CSV — Custom timeframe…</button>
+                        <button data-range="json-all">JSON — All records</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1037,6 +1183,17 @@
                             <input type="text" id="currencyCode" maxlength="10" placeholder="USD" value="USD">
                         </div>
                         <button class="btn btn-primary" id="saveCurrencyBtn" style="flex-shrink:0;width:auto;padding:8px 14px">Save</button>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h4>Monthly Budget</h4>
+                    <div class="budget-input-row">
+                        <div class="form-group">
+                            <label for="budgetAmount">Limit per month <span class="optional-hint">(0 = no limit)</span></label>
+                            <input type="number" id="budgetAmount" min="0" step="0.01" placeholder="e.g. 500">
+                        </div>
+                        <button class="btn btn-primary" id="saveBudgetBtn" style="flex-shrink:0;width:auto;padding:8px 14px">Save</button>
                     </div>
                 </div>
 
@@ -1094,6 +1251,16 @@
         </div><!-- /#expensesView -->
 
         <div id="analyticsView">
+            <div class="analytics-charts" id="analyticsCharts" style="display:none">
+                <div class="chart-card">
+                    <div class="chart-title">Monthly Spending</div>
+                    <div id="monthlyBarChart"></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-title">Category Breakdown</div>
+                    <div id="categoryDonutChart"></div>
+                </div>
+            </div>
             <div class="analytics-table-wrap" id="analyticsTableWrap">
                 <p class="analytics-no-data" id="analyticsNoData">No expenses yet. Add some to see analytics.</p>
             </div>
@@ -1160,6 +1327,47 @@
             document.getElementById('currencyCode').value = code;
         }
 
+        // ── Budget helpers (localStorage) ────────────────────────────────────
+        function getMonthlyBudget() {
+            try {
+                const raw = localStorage.getItem('expenseMonthlyBudget');
+                if (raw !== null) {
+                    const val = parseFloat(raw);
+                    if (Number.isFinite(val) && val >= 0) return val;
+                }
+            } catch (_) { /* ignore */ }
+            return 0;
+        }
+
+        function saveMonthlyBudget(amount) {
+            localStorage.setItem('expenseMonthlyBudget', String(amount));
+        }
+
+        function updateBudgetUI() {
+            const budget = getMonthlyBudget();
+            document.getElementById('budgetAmount').value = budget > 0 ? budget : '';
+        }
+
+        function renderBudgetProgress(currentTotal) {
+            const budget = getMonthlyBudget();
+            const progressEl = document.getElementById('budgetProgress');
+            if (!budget || budget <= 0) {
+                progressEl.style.display = 'none';
+                return;
+            }
+            progressEl.style.display = '';
+            const pct = Math.min((currentTotal / budget) * 100, 100);
+            const fill = document.getElementById('budgetBarFill');
+            fill.style.width = pct + '%';
+            fill.className = 'budget-bar-fill' +
+                (currentTotal >= budget ? ' over-budget' : currentTotal >= budget * 0.8 ? ' near-budget' : '');
+            const { symbol } = getCurrency();
+            const remaining = budget - currentTotal;
+            document.getElementById('budgetLabel').textContent = remaining >= 0
+                ? `${symbol}${remaining.toFixed(2)} left of ${symbol}${budget.toFixed(2)} budget`
+                : `${symbol}${Math.abs(remaining).toFixed(2)} over budget`;
+        }
+
         // ── IndexedDB open ───────────────────────────────────────────────────
         function openDB() {
             return new Promise((resolve, reject) => {
@@ -1189,6 +1397,18 @@
                 const request = store.add(expense);
                 request.onsuccess = () => resolve(request.result);
                 request.onerror = (event) => reject(event.target.error);
+            });
+        }
+
+        function addExpensesBatchToDB(db, expenses) {
+            return new Promise((resolve, reject) => {
+                if (expenses.length === 0) { resolve(); return; }
+                const tx = db.transaction(STORE_NAME, 'readwrite');
+                const store = tx.objectStore(STORE_NAME);
+                expenses.forEach(expense => store.add(expense));
+                tx.oncomplete = () => resolve();
+                tx.onerror = (event) => reject(event.target.error);
+                tx.onabort = (event) => reject(event.target.error);
             });
         }
 
@@ -1372,6 +1592,7 @@
             renderCategorySelect();
             renderFilterCategoryOptions();
             updateCurrencyUI();
+            updateBudgetUI();
             await renderExpenses();
         }
 
@@ -1420,16 +1641,19 @@
             const previousStart = new Date(prevYear, prevMonth, 1).getTime();
             const previousEnd = new Date(prevYear, prevMonth + 1, 0, 23, 59, 59, 999).getTime();
 
-            const { currentTotal, previousTotal } = expenses.reduce((acc, e) => {
+            const { currentTotal, previousTotal, runningTotal } = expenses.reduce((acc, e) => {
                 const ts = e.timestamp;
                 const amt = parseFloat(e.amount);
                 if (ts >= currentStart && ts <= currentEnd) acc.currentTotal += amt;
                 else if (ts >= previousStart && ts <= previousEnd) acc.previousTotal += amt;
+                acc.runningTotal += amt;
                 return acc;
-            }, { currentTotal: 0, previousTotal: 0 });
+            }, { currentTotal: 0, previousTotal: 0, runningTotal: 0 });
 
             document.getElementById('currentMonthTotal').textContent = formatAmount(currentTotal);
             document.getElementById('previousMonthTotal').textContent = formatAmount(previousTotal);
+            document.getElementById('runningTotal').textContent = formatAmount(runningTotal);
+            renderBudgetProgress(currentTotal);
         }
 
         // ── Rendering ────────────────────────────────────────────────────────
@@ -1767,8 +1991,68 @@
             const range = btn.dataset.range;
             if (range === 'custom') {
                 document.getElementById('customRangeModal').classList.add('open');
+            } else if (range === 'json-all') {
+                await exportJSON();
             } else {
                 await exportExpenses(range);
+            }
+        });
+
+        // ── JSON Export ──────────────────────────────────────────────────────
+        async function exportJSON() {
+            const allExpenses = await getAllExpenses(db);
+            if (allExpenses.length === 0) {
+                showMessage('No expenses to export.', 'error');
+                return;
+            }
+            const payload = JSON.stringify(allExpenses, null, 2);
+            const blob = new Blob([payload], { type: 'application/json;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            const now = new Date();
+            link.download = `expenses_${now.toISOString().slice(0, 10)}.json`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            showMessage(`Exported ${allExpenses.length} expense(s) as JSON.`, 'success');
+        }
+
+        // ── JSON Import ──────────────────────────────────────────────────────
+        document.getElementById('importJsonBtn').addEventListener('click', () => {
+            document.getElementById('importJsonInput').click();
+        });
+
+        document.getElementById('importJsonInput').addEventListener('change', async (e) => {
+            const file = e.target.files && e.target.files[0];
+            e.target.value = '';
+            if (!file) return;
+            try {
+                const text = await file.text();
+                const data = JSON.parse(text);
+                if (!Array.isArray(data)) throw new Error('JSON must be an array of expenses.');
+                const valid = [];
+                let skipped = 0;
+                for (const raw of data) {
+                    const amount = parseFloat(raw.amount);
+                    const item = typeof raw.item === 'string' ? raw.item.trim() : '';
+                    const timestamp = raw.timestamp;
+                    if (!item || !Number.isFinite(amount) || amount <= 0 || !Number.isFinite(timestamp) || !Number.isSafeInteger(timestamp)) { skipped++; continue; }
+                    const expense = { amount, item, timestamp };
+                    if (raw.category && typeof raw.category === 'string') expense.category = raw.category;
+                    if (raw.vacation === true) expense.vacation = true;
+                    if (typeof raw.latitude === 'number' && raw.latitude >= -90 && raw.latitude <= 90) expense.latitude = raw.latitude;
+                    if (typeof raw.longitude === 'number' && raw.longitude >= -180 && raw.longitude <= 180) expense.longitude = raw.longitude;
+                    if (typeof raw.accuracy === 'number') expense.accuracy = raw.accuracy;
+                    valid.push(expense);
+                }
+                await addExpensesBatchToDB(db, valid);
+                await renderExpenses();
+                showMessage(`Imported ${valid.length} expense(s)${skipped ? `, skipped ${skipped} invalid` : ''}.`, 'success');
+            } catch (err) {
+                console.error('JSON import error:', err);
+                showMessage('Failed to import: ' + (err.message || 'Invalid JSON file.'), 'error');
             }
         });
 
@@ -1818,18 +2102,155 @@
                 .toLocaleDateString(undefined, { month: 'short', year: 'numeric' });
         }
 
+        // Short label e.g. "Apr"
+        function monthShortLabel(key) {
+            const [y, m] = key.split('-');
+            return new Date(Number(y), Number(m) - 1, 1)
+                .toLocaleDateString(undefined, { month: 'short' });
+        }
+
+        // Palette for category donut chart (up to 12 distinct categories supported)
+        const CHART_COLORS = [
+            '#667eea', '#764ba2', '#28a745', '#f6a623',
+            '#dc3545', '#17a2b8', '#6f42c1', '#fd7e14',
+            '#20c997', '#e83e8c', '#6c757d', '#343a40',
+        ];
+
+        // ── SVG Bar Chart (monthly totals) ───────────────────────────────────
+        function renderMonthlyBarChart(monthlyData) {
+            // monthlyData: array of { key, label, total } sorted oldest→newest (max 12)
+            const container = document.getElementById('monthlyBarChart');
+            container.innerHTML = '';
+            if (!monthlyData || monthlyData.length === 0) return;
+
+            const BAR_W = 240, BAR_H = 120, PAD_L = 8, PAD_R = 4, PAD_T = 12, PAD_B = 24;
+            const maxVal = Math.max(...monthlyData.map(d => d.total), 0.01);
+            const n = monthlyData.length;
+            const barW = Math.max(4, Math.floor((BAR_W - PAD_L - PAD_R) / n) - 3);
+            const gap = Math.floor((BAR_W - PAD_L - PAD_R - barW * n) / Math.max(n - 1, 1));
+            const { symbol } = getCurrency();
+
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.setAttribute('viewBox', `0 0 ${BAR_W} ${BAR_H}`);
+            svg.setAttribute('role', 'img');
+            svg.setAttribute('aria-label', 'Monthly spending bar chart');
+            svg.className = 'chart-svg';
+
+            monthlyData.forEach((d, i) => {
+                const barH = Math.max(2, ((d.total / maxVal) * (BAR_H - PAD_T - PAD_B)));
+                const x = PAD_L + i * (barW + gap);
+                const y = BAR_H - PAD_B - barH;
+
+                // Bar
+                const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                rect.setAttribute('x', x);
+                rect.setAttribute('y', y);
+                rect.setAttribute('width', barW);
+                rect.setAttribute('height', barH);
+                rect.setAttribute('fill', '#667eea');
+                rect.setAttribute('rx', '2');
+                rect.setAttribute('aria-label', `${d.label}: ${symbol}${d.total.toFixed(2)}`);
+                svg.appendChild(rect);
+
+                // Value label above bar (only if bar is tall enough)
+                if (barH > 16) {
+                    const valText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                    valText.setAttribute('x', x + barW / 2);
+                    valText.setAttribute('y', y - 2);
+                    valText.setAttribute('text-anchor', 'middle');
+                    valText.setAttribute('font-size', '8');
+                    valText.setAttribute('fill', '#555');
+                    valText.textContent = symbol + Math.round(d.total);
+                    svg.appendChild(valText);
+                }
+
+                // Month label
+                const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                label.setAttribute('x', x + barW / 2);
+                label.setAttribute('y', BAR_H - PAD_B + 10);
+                label.setAttribute('text-anchor', 'middle');
+                label.setAttribute('font-size', '8');
+                label.setAttribute('fill', '#888');
+                label.textContent = monthShortLabel(d.key);
+                svg.appendChild(label);
+            });
+
+            container.appendChild(svg);
+        }
+
+        // ── SVG Donut Chart (category breakdown) ─────────────────────────────
+        function renderCategoryDonutChart(catData) {
+            // catData: array of { label, total, color }
+            const container = document.getElementById('categoryDonutChart');
+            container.innerHTML = '';
+            if (!catData || catData.length === 0) return;
+
+            const total = catData.reduce((s, d) => s + d.total, 0);
+            if (total <= 0) return;
+
+            const DONUT_SIZE = 120, DONUT_CX = 60, DONUT_CY = 60, DONUT_R = 48, DONUT_INNER_R = 26;
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.setAttribute('viewBox', `0 0 ${DONUT_SIZE} ${DONUT_SIZE}`);
+            svg.setAttribute('role', 'img');
+            svg.setAttribute('aria-label', 'Category breakdown donut chart');
+            svg.className = 'chart-svg';
+            svg.style.maxWidth = `${DONUT_SIZE}px`;
+
+            let startAngle = -Math.PI / 2;
+            catData.forEach(d => {
+                const sweep = (d.total / total) * 2 * Math.PI;
+                const endAngle = startAngle + sweep;
+                const x1 = DONUT_CX + DONUT_R * Math.cos(startAngle);
+                const y1 = DONUT_CY + DONUT_R * Math.sin(startAngle);
+                const x2 = DONUT_CX + DONUT_R * Math.cos(endAngle);
+                const y2 = DONUT_CY + DONUT_R * Math.sin(endAngle);
+                const ix1 = DONUT_CX + DONUT_INNER_R * Math.cos(endAngle);
+                const iy1 = DONUT_CY + DONUT_INNER_R * Math.sin(endAngle);
+                const ix2 = DONUT_CX + DONUT_INNER_R * Math.cos(startAngle);
+                const iy2 = DONUT_CY + DONUT_INNER_R * Math.sin(startAngle);
+                const large = sweep > Math.PI ? 1 : 0;
+
+                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                path.setAttribute('d',
+                    `M ${x1} ${y1} A ${DONUT_R} ${DONUT_R} 0 ${large} 1 ${x2} ${y2} ` +
+                    `L ${ix1} ${iy1} A ${DONUT_INNER_R} ${DONUT_INNER_R} 0 ${large} 0 ${ix2} ${iy2} Z`
+                );
+                path.setAttribute('fill', d.color);
+                path.setAttribute('aria-label', `${d.label}: ${((d.total / total) * 100).toFixed(1)}%`);
+                svg.appendChild(path);
+                startAngle = endAngle;
+            });
+
+            container.appendChild(svg);
+
+            // Legend
+            const legend = document.createElement('div');
+            legend.className = 'chart-legend';
+            const { symbol } = getCurrency();
+            catData.forEach(d => {
+                const item = document.createElement('div');
+                item.className = 'chart-legend-item';
+                item.innerHTML = `<span class="chart-legend-dot" style="background:${d.color}"></span>${escapeHtml(d.label)}: ${symbol}${d.total.toFixed(0)}`;
+                legend.appendChild(item);
+            });
+            container.appendChild(legend);
+        }
+
         async function renderAnalytics() {
             const expenses = await getAllExpenses(db);
             const wrap = document.getElementById('analyticsTableWrap');
             const noData = document.getElementById('analyticsNoData');
+            const chartsEl = document.getElementById('analyticsCharts');
 
             if (expenses.length === 0) {
                 noData.style.display = 'block';
+                chartsEl.style.display = 'none';
                 const existing = wrap.querySelector('table');
                 if (existing) existing.remove();
                 return;
             }
             noData.style.display = 'none';
+            chartsEl.style.display = '';
 
             // Collect unique year-month keys, newest first
             const monthSet = new Set();
@@ -1872,6 +2293,33 @@
             // Sort category rows by previous month amount descending
             const prevMonth = months[1] || months[0];
             catRows.sort((a, b) => (totals[b.key][prevMonth] || 0) - (totals[a.key][prevMonth] || 0));
+
+            // ── Render bar chart (monthly totals, last 12 months, oldest→newest) ──
+            const chartMonths = months.slice().reverse().slice(-12);
+            const monthlyTotals = {};
+            expenses.forEach(e => {
+                const d = new Date(e.timestamp);
+                const mk = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+                monthlyTotals[mk] = (monthlyTotals[mk] || 0) + parseFloat(e.amount);
+            });
+            const monthlyBarData = chartMonths.map(mk => ({
+                key: mk,
+                label: monthLabel(mk),
+                total: monthlyTotals[mk] || 0,
+            }));
+            renderMonthlyBarChart(monthlyBarData);
+
+            // ── Render donut chart (category totals all-time, top categories) ──
+            const catTotalsAll = catRows
+                .map((c, i) => ({
+                    label: c.label,
+                    total: months.reduce((s, mk) => s + (totals[c.key][mk] || 0), 0),
+                    color: CHART_COLORS[i % CHART_COLORS.length],
+                }))
+                .filter(d => d.total > 0)
+                .sort((a, b) => b.total - a.total)
+                .slice(0, 10);
+            renderCategoryDonutChart(catTotalsAll);
 
             // Build table
             const table = document.createElement('table');
@@ -2000,6 +2448,7 @@
         document.getElementById('settingsBtn').addEventListener('click', () => {
             renderSettingsCategoryList();
             updateCurrencyUI();
+            updateBudgetUI();
             document.getElementById('settingsModal').classList.add('open');
         });
 
@@ -2025,6 +2474,15 @@
             updateCurrencyUI();
             renderExpenses();
             showMessage(`Currency updated to ${symbol} (${code || 'USD'}).`, 'success');
+        });
+
+        // Budget save
+        document.getElementById('saveBudgetBtn').addEventListener('click', () => {
+            const val = parseFloat(document.getElementById('budgetAmount').value);
+            const budget = Number.isFinite(val) && val >= 0 ? val : 0;
+            saveMonthlyBudget(budget);
+            renderExpenses();
+            showMessage(budget > 0 ? `Monthly budget set to ${formatAmount(budget)}.` : 'Monthly budget cleared.', 'success');
         });
 
         // Category list actions (edit / delete / confirm delete)
