@@ -1400,6 +1400,18 @@
             });
         }
 
+        function addExpensesBatchToDB(db, expenses) {
+            return new Promise((resolve, reject) => {
+                if (expenses.length === 0) { resolve(); return; }
+                const tx = db.transaction(STORE_NAME, 'readwrite');
+                const store = tx.objectStore(STORE_NAME);
+                expenses.forEach(expense => store.add(expense));
+                tx.oncomplete = () => resolve();
+                tx.onerror = (event) => reject(event.target.error);
+                tx.onabort = (event) => reject(event.target.error);
+            });
+        }
+
         function getAllExpenses(db) {
             return new Promise((resolve, reject) => {
                 const tx = db.transaction(STORE_NAME, 'readonly');
@@ -2020,7 +2032,7 @@
                 const text = await file.text();
                 const data = JSON.parse(text);
                 if (!Array.isArray(data)) throw new Error('JSON must be an array of expenses.');
-                let imported = 0;
+                const valid = [];
                 let skipped = 0;
                 for (const raw of data) {
                     const amount = parseFloat(raw.amount);
@@ -2033,11 +2045,11 @@
                     if (typeof raw.latitude === 'number' && raw.latitude >= -90 && raw.latitude <= 90) expense.latitude = raw.latitude;
                     if (typeof raw.longitude === 'number' && raw.longitude >= -180 && raw.longitude <= 180) expense.longitude = raw.longitude;
                     if (typeof raw.accuracy === 'number') expense.accuracy = raw.accuracy;
-                    await addExpenseToDB(db, expense);
-                    imported++;
+                    valid.push(expense);
                 }
+                await addExpensesBatchToDB(db, valid);
                 await renderExpenses();
-                showMessage(`Imported ${imported} expense(s)${skipped ? `, skipped ${skipped} invalid` : ''}.`, 'success');
+                showMessage(`Imported ${valid.length} expense(s)${skipped ? `, skipped ${skipped} invalid` : ''}.`, 'success');
             } catch (err) {
                 console.error('JSON import error:', err);
                 showMessage('Failed to import: ' + (err.message || 'Invalid JSON file.'), 'error');
