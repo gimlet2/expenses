@@ -2025,8 +2025,8 @@
                 for (const raw of data) {
                     const amount = parseFloat(raw.amount);
                     const item = typeof raw.item === 'string' ? raw.item.trim() : '';
-                    const timestamp = typeof raw.timestamp === 'number' ? raw.timestamp : Date.now();
-                    if (!item || !Number.isFinite(amount) || amount <= 0) { skipped++; continue; }
+                    const timestamp = raw.timestamp;
+                    if (!item || !Number.isFinite(amount) || amount <= 0 || !Number.isFinite(timestamp) || !Number.isSafeInteger(timestamp)) { skipped++; continue; }
                     const expense = { amount, item, timestamp };
                     if (raw.category && typeof raw.category === 'string') expense.category = raw.category;
                     if (raw.vacation === true) expense.vacation = true;
@@ -2284,10 +2284,16 @@
 
             // ── Render bar chart (monthly totals, last 12 months, oldest→newest) ──
             const chartMonths = months.slice().reverse().slice(-12);
+            const monthlyTotals = {};
+            expenses.forEach(e => {
+                const d = new Date(e.timestamp);
+                const mk = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+                monthlyTotals[mk] = (monthlyTotals[mk] || 0) + parseFloat(e.amount);
+            });
             const monthlyBarData = chartMonths.map(mk => ({
                 key: mk,
                 label: monthLabel(mk),
-                total: catRows.reduce((s, c) => s + (totals[c.key][mk] || 0), 0),
+                total: monthlyTotals[mk] || 0,
             }));
             renderMonthlyBarChart(monthlyBarData);
 

@@ -46,9 +46,9 @@ Alternatively, deploy the single `index.html` file to any static hosting service
 
 ### CSV export
 
-| Date | Item | Category | Amount | Vacation | Latitude | Longitude |
-|------|------|----------|--------|----------|----------|-----------|
-| Locale timestamp | Description | Category label | Decimal number | Yes/No | Optional | Optional |
+| Date | Item | Category | Amount (<currency code>) | Vacation | Latitude | Longitude |
+|------|------|----------|--------------------------|----------|----------|-----------|
+| Locale timestamp | Description | Category label | Decimal number; header includes the selected currency code (for example, `Amount (USD)`) | Yes/No | Optional | Optional |
 
 ### JSON export / import
 
