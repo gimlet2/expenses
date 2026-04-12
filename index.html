@@ -1226,7 +1226,7 @@
         <div class="profile-bar">
             <span style="font-size:13px;color:#888;white-space:nowrap">📁</span>
             <select id="profileSelect" aria-label="Active expense book"></select>
-            <button class="btn-add-profile" id="addProfileBtn" title="New expense book">+</button>
+            <button class="btn-add-profile" id="addProfileBtn" aria-label="New expense book" title="New expense book">+</button>
         </div>
 
         <div id="message" class="message"></div>
@@ -2371,19 +2371,51 @@
         }
 
         // ── WebDAV helpers ────────────────────────────────────────────────────
+        function getWebDAVPasswordSessionKey() {
+            return `${WEBDAV_SETTINGS_KEY}:password`;
+        }
+
         function getWebDAVSettings() {
+            let persisted = { url: '', username: '' };
             try {
                 const raw = localStorage.getItem(WEBDAV_SETTINGS_KEY);
                 if (raw) {
                     const obj = JSON.parse(raw);
-                    if (obj && typeof obj === 'object') return obj;
+                    if (obj && typeof obj === 'object') {
+                        persisted = {
+                            url: typeof obj.url === 'string' ? obj.url : '',
+                            username: typeof obj.username === 'string' ? obj.username : ''
+                        };
+                        if (typeof obj.password === 'string' && obj.password) {
+                            sessionStorage.setItem(getWebDAVPasswordSessionKey(), obj.password);
+                            localStorage.setItem(WEBDAV_SETTINGS_KEY, JSON.stringify(persisted));
+                        }
+                    }
                 }
             } catch (_) { /* ignore */ }
-            return { url: '', username: '', password: '' };
+
+            let password = '';
+            try {
+                password = sessionStorage.getItem(getWebDAVPasswordSessionKey()) || '';
+            } catch (_) { /* ignore */ }
+
+            return { url: persisted.url, username: persisted.username, password };
         }
 
         function saveWebDAVSettings(settings) {
-            localStorage.setItem(WEBDAV_SETTINGS_KEY, JSON.stringify(settings));
+            const persisted = {
+                url: settings && typeof settings.url === 'string' ? settings.url : '',
+                username: settings && typeof settings.username === 'string' ? settings.username : ''
+            };
+            localStorage.setItem(WEBDAV_SETTINGS_KEY, JSON.stringify(persisted));
+            try {
+                const password = settings && typeof settings.password === 'string' ? settings.password : '';
+                if (password) {
+                    sessionStorage.setItem(getWebDAVPasswordSessionKey(), password);
+                } else {
+                    sessionStorage.removeItem(getWebDAVPasswordSessionKey());
+                }
+            } catch (_) { /* ignore */ }
         }
 
         function updateWebDAVUI() {
@@ -2428,9 +2460,16 @@
                 // Identity key uses JSON.stringify to avoid collisions with items containing separator characters
                 const identityKey = e => JSON.stringify([e.timestamp, e.amount, e.item]);
                 const localKeys = new Set(local.map(identityKey));
+                const seenRemoteKeys = new Set();
                 const toAdd = remoteExpenses
                     .map(r => validateExpenseRaw(r))
-                    .filter(e => e !== null && !localKeys.has(identityKey(e)));
+                    .filter(e => {
+                        if (e === null) return false;
+                        const key = identityKey(e);
+                        if (localKeys.has(key) || seenRemoteKeys.has(key)) return false;
+                        seenRemoteKeys.add(key);
+                        return true;
+                    });
                 if (toAdd.length > 0) {
                     await addExpensesBatchToDB(db, toAdd);
                 }
@@ -2460,7 +2499,13 @@
 
         // ── Share URL (AES-GCM encrypted URL fragment) ───────────────────────
         function toBase64Url(bytes) {
-            return btoa(String.fromCharCode(...new Uint8Array(bytes)))
+            const uint8 = new Uint8Array(bytes);
+            const chunkSize = 0x8000;
+            let binary = '';
+            for (let i = 0; i < uint8.length; i += chunkSize) {
+                binary += String.fromCharCode.apply(null, uint8.subarray(i, i + chunkSize));
+            }
+            return btoa(binary)
                 .replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
         }
 
@@ -2482,8 +2527,11 @@
         }
 
         async function decompressBytes(bytes, wasCompressed) {
-            if (!wasCompressed || typeof DecompressionStream === 'undefined') {
+            if (!wasCompressed) {
                 return new TextDecoder().decode(bytes);
+            }
+            if (typeof DecompressionStream === 'undefined') {
+                throw new Error('This shared payload is compressed, but this browser does not support decompression.');
             }
             const ds = new DecompressionStream('deflate-raw');
             const writer = ds.writable.getWriter();
