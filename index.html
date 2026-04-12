@@ -1071,6 +1071,148 @@
             padding: 8px 10px;
             font-size: 14px;
         }
+
+        /* ── Profile bar ─────────────────────────────────────────────────── */
+        .profile-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+
+        .profile-bar select {
+            width: auto;
+            min-width: 130px;
+            max-width: 200px;
+            font-size: 14px;
+            padding: 5px 8px;
+            min-height: unset;
+            font-weight: 500;
+        }
+
+        .btn-add-profile {
+            background: none;
+            border: 1px solid #667eea;
+            color: #667eea;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            padding: 2px 9px;
+            line-height: 1.4;
+            transition: background 0.2s;
+        }
+
+        .btn-add-profile:hover {
+            background: #f0f2ff;
+        }
+
+        /* ── Share URL modal ─────────────────────────────────────────────── */
+        .share-url-box {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 12px;
+            font-family: monospace;
+            resize: none;
+            color: #555;
+            background: #f8f9fa;
+            word-break: break-all;
+            box-sizing: border-box;
+            margin-top: 10px;
+        }
+
+        .share-url-box:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .share-note {
+            font-size: 12px;
+            color: #888;
+            margin-top: 6px;
+            line-height: 1.5;
+        }
+
+        /* ── WebDAV settings ─────────────────────────────────────────────── */
+        .webdav-input {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+            margin-top: 4px;
+        }
+
+        .webdav-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .webdav-row {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .webdav-status {
+            font-size: 12px;
+            color: #888;
+            margin-top: 6px;
+            line-height: 1.5;
+            min-height: 18px;
+        }
+
+        /* ── Profile list in settings ────────────────────────────────────── */
+        .profile-list-item {
+            display: flex;
+            align-items: center;
+            padding: 6px 4px;
+            border-bottom: 1px solid #f5f5f5;
+            gap: 6px;
+        }
+
+        .profile-list-item:last-child {
+            border-bottom: none;
+        }
+
+        .profile-list-name {
+            flex: 1;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .profile-list-badge {
+            font-size: 11px;
+            background: #667eea;
+            color: white;
+            border-radius: 10px;
+            padding: 1px 7px;
+        }
+
+        .add-profile-row {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #eee;
+        }
+
+        .add-profile-row input[type="text"] {
+            flex: 1;
+            padding: 6px 8px;
+            font-size: 13px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+        }
+
+        .add-profile-row input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
     </style>
 </head>
 <body>
@@ -1080,6 +1222,12 @@
             <button class="settings-btn" id="settingsBtn" aria-label="Settings" title="Settings">⚙️</button>
         </div>
         <p class="subtitle">Track your expenses locally — no account needed</p>
+
+        <div class="profile-bar">
+            <span style="font-size:13px;color:#888;white-space:nowrap">📁</span>
+            <select id="profileSelect" aria-label="Active expense book"></select>
+            <button class="btn-add-profile" id="addProfileBtn" aria-label="New expense book" title="New expense book">+</button>
+        </div>
 
         <div id="message" class="message"></div>
 
@@ -1162,6 +1310,7 @@
                         <button data-range="all">CSV — All records</button>
                         <button data-range="custom">CSV — Custom timeframe…</button>
                         <button data-range="json-all">JSON — All records</button>
+                        <button data-range="share-link">🔗 Share link (encrypted URL)…</button>
                     </div>
                 </div>
             </div>
@@ -1170,6 +1319,15 @@
         <div class="modal-overlay" id="settingsModal">
             <div class="modal modal-settings">
                 <h3>⚙️ Settings</h3>
+
+                <div class="settings-section">
+                    <h4>Expense Books</h4>
+                    <div id="profileList"></div>
+                    <div class="add-profile-row">
+                        <input type="text" id="newProfileName" placeholder="Book name" maxlength="30" aria-label="New expense book name">
+                        <button class="btn btn-primary btn-sm" id="createProfileBtn" style="width:auto;padding:6px 12px">Create</button>
+                    </div>
+                </div>
 
                 <div class="settings-section">
                     <h4>Currency</h4>
@@ -1207,6 +1365,27 @@
                     </div>
                 </div>
 
+                <div class="settings-section">
+                    <h4>WebDAV Sync</h4>
+                    <div class="form-group" style="margin-bottom:10px">
+                        <label for="webdavUrl" style="font-size:13px;margin-bottom:4px">Server URL</label>
+                        <input type="text" class="webdav-input" id="webdavUrl" placeholder="https://cloud.example.com/dav/expenses/" autocomplete="off">
+                    </div>
+                    <div class="form-group" style="margin-bottom:10px">
+                        <label for="webdavUser" style="font-size:13px;margin-bottom:4px">Username <span class="optional-hint">(optional)</span></label>
+                        <input type="text" class="webdav-input" id="webdavUser" placeholder="username" autocomplete="off">
+                    </div>
+                    <div class="form-group" style="margin-bottom:0">
+                        <label for="webdavPass" style="font-size:13px;margin-bottom:4px">Password / Token <span class="optional-hint">(optional)</span></label>
+                        <input type="password" class="webdav-input" id="webdavPass" placeholder="••••••••" autocomplete="new-password">
+                    </div>
+                    <div class="webdav-row">
+                        <button class="btn btn-primary" id="saveWebDAVBtn" style="width:auto;padding:8px 14px">Save</button>
+                        <button class="btn btn-export" id="syncWebDAVBtn" style="width:auto;padding:8px 14px">⟳ Sync Now</button>
+                    </div>
+                    <p class="webdav-status" id="webdavStatus"></p>
+                </div>
+
                 <div class="modal-actions">
                     <button class="btn btn-secondary" id="closeSettingsBtn">Close</button>
                 </div>
@@ -1227,6 +1406,29 @@
                 <div class="modal-actions">
                     <button class="btn btn-secondary" id="cancelCustomRange">Cancel</button>
                     <button class="btn btn-export" id="confirmCustomRange">Export</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-overlay" id="shareModal">
+            <div class="modal">
+                <h3>🔗 Share Expenses</h3>
+                <p class="share-note">Copy this link to import your expenses on another device. The encryption key lives only in the URL fragment — it is never sent to any server.</p>
+                <textarea class="share-url-box" id="shareUrlOutput" rows="5" readonly aria-label="Share URL"></textarea>
+                <div class="modal-actions">
+                    <button class="btn btn-primary" id="copyShareUrlBtn">Copy Link</button>
+                    <button class="btn btn-secondary" id="closeShareModalBtn">Close</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-overlay" id="importShareModal">
+            <div class="modal">
+                <h3>📥 Import Shared Expenses</h3>
+                <p id="importShareInfo" style="font-size:14px;color:#555;margin-bottom:12px"></p>
+                <div class="modal-actions">
+                    <button class="btn btn-primary" id="confirmImportShareBtn">Import</button>
+                    <button class="btn btn-secondary" id="cancelImportShareBtn">Cancel</button>
                 </div>
             </div>
         </div>
@@ -1274,6 +1476,143 @@
         const STORE_NAME = 'expenses';
         const CAT_STORE_NAME = 'categories';
 
+        // ── Profile & sharing constants ──────────────────────────────────────
+        const PROFILES_KEY = 'expenseProfiles';
+        const CURRENT_PROFILE_KEY = 'expenseCurrentProfile';
+        const WEBDAV_SETTINGS_KEY = 'expenseWebDAV';
+        const SHARE_MAX_EXPENSES = 500;
+
+        // ── Profile helpers ──────────────────────────────────────────────────
+        function generateProfileId(existingIds) {
+            let id;
+            do {
+                const arr = new Uint8Array(6);
+                crypto.getRandomValues(arr);
+                id = Array.from(arr, b => b.toString(16).padStart(2, '0')).join('');
+            } while (existingIds && existingIds.has(id));
+            return id;
+        }
+
+        function getProfiles() {
+            try {
+                const raw = localStorage.getItem(PROFILES_KEY);
+                if (raw) {
+                    const arr = JSON.parse(raw);
+                    if (Array.isArray(arr) && arr.length > 0) {
+                        // Migrate old string format (v1) to {name, id} objects
+                        let needsSave = false;
+                        const seenIds = new Set();
+                        const migrated = arr.map((p, idx) => {
+                            if (typeof p === 'string') {
+                                needsSave = true;
+                                // Use old sanitized name as id for backward-compat with existing DBs;
+                                // append index if the sanitized name is empty or already taken
+                                let id = p === 'Default' ? 'default' : p.replace(/[^a-zA-Z0-9_-]/g, '_');
+                                if (!id || seenIds.has(id)) id = 'book_' + idx;
+                                seenIds.add(id);
+                                return { name: p, id };
+                            }
+                            if (p && typeof p.id === 'string') seenIds.add(p.id);
+                            return p;
+                        }).filter(p => p && typeof p.name === 'string' && p.name.trim() && typeof p.id === 'string');
+                        if (needsSave && migrated.length > 0) saveProfiles(migrated);
+                        if (migrated.length > 0) return migrated;
+                    }
+                }
+            } catch (_) { /* ignore */ }
+            return [{ name: 'Default', id: 'default' }];
+        }
+
+        function saveProfiles(profiles) {
+            localStorage.setItem(PROFILES_KEY, JSON.stringify(profiles));
+        }
+
+        // Returns the id of the current profile. Migrates from old name-based format if needed.
+        function getCurrentProfileId() {
+            const stored = localStorage.getItem(CURRENT_PROFILE_KEY);
+            if (!stored) return 'default';
+            const profiles = getProfiles();
+            if (profiles.some(p => p.id === stored)) return stored;
+            // Old format: stored value is a profile name — find its id and migrate
+            const match = profiles.find(p => p.name === stored);
+            if (match) {
+                localStorage.setItem(CURRENT_PROFILE_KEY, match.id);
+                return match.id;
+            }
+            return 'default';
+        }
+
+        function getCurrentProfileName() {
+            const id = getCurrentProfileId();
+            const profiles = getProfiles();
+            const profile = profiles.find(p => p.id === id);
+            return profile ? profile.name : 'Default';
+        }
+
+        function setCurrentProfileId(id) {
+            localStorage.setItem(CURRENT_PROFILE_KEY, id);
+        }
+
+        function getDBNameForProfile(id) {
+            if (!id || id === 'default') return DB_NAME;
+            return DB_NAME + '_' + id;
+        }
+
+        // Returns the localStorage key scoped to the active profile.
+        // The 'default' profile uses the bare key for backward compatibility.
+        function profileKey(key) {
+            const id = getCurrentProfileId();
+            if (!id || id === 'default') return key;
+            return key + '_' + id;
+        }
+
+        function renderProfileBar() {
+            const sel = document.getElementById('profileSelect');
+            const profiles = getProfiles();
+            const currentId = getCurrentProfileId();
+            sel.innerHTML = '';
+            profiles.forEach(profile => {
+                const opt = document.createElement('option');
+                opt.value = profile.id;
+                opt.textContent = profile.name;
+                if (profile.id === currentId) opt.selected = true;
+                sel.appendChild(opt);
+            });
+        }
+
+        function renderProfileList() {
+            const container = document.getElementById('profileList');
+            const profiles = getProfiles();
+            const currentId = getCurrentProfileId();
+            container.innerHTML = '';
+            if (profiles.length === 0) {
+                container.innerHTML = '<p style="color:#999;font-size:13px;padding:4px 0">No profiles.</p>';
+                return;
+            }
+            profiles.forEach(profile => {
+                const row = document.createElement('div');
+                row.className = 'profile-list-item';
+                const nameSpan = document.createElement('span');
+                nameSpan.className = 'profile-list-name';
+                nameSpan.textContent = profile.name;
+                row.appendChild(nameSpan);
+                if (profile.id === currentId) {
+                    const badge = document.createElement('span');
+                    badge.className = 'profile-list-badge';
+                    badge.textContent = 'active';
+                    row.appendChild(badge);
+                } else {
+                    const delBtn = document.createElement('button');
+                    delBtn.className = 'btn btn-danger btn-sm profile-delete-btn';
+                    delBtn.dataset.id = profile.id;
+                    delBtn.setAttribute('aria-label', 'Delete expense book ' + escapeHtml(profile.name));
+                    delBtn.textContent = '✕';
+                    row.appendChild(delBtn);
+                }
+                container.appendChild(row);
+            });
+        }
+
         // ── Default categories (used to pre-populate on first run) ───────────
         const DEFAULT_CATEGORIES = [
             { value: 'coffee',        label: 'Coffee',        icon: '☕' },
@@ -1299,10 +1638,10 @@
             return categories.find(c => c.value === value) || null;
         }
 
-        // ── Currency helpers (localStorage) ──────────────────────────────────
+        // ── Currency helpers (localStorage, profile-scoped) ──────────────────
         function getCurrency() {
             try {
-                const raw = localStorage.getItem('expenseCurrency');
+                const raw = localStorage.getItem(profileKey('expenseCurrency'));
                 if (raw) {
                     const parsed = JSON.parse(raw);
                     if (parsed && parsed.symbol && parsed.code) return parsed;
@@ -1312,7 +1651,7 @@
         }
 
         function saveCurrency(symbol, code) {
-            localStorage.setItem('expenseCurrency', JSON.stringify({ symbol, code }));
+            localStorage.setItem(profileKey('expenseCurrency'), JSON.stringify({ symbol, code }));
         }
 
         function formatAmount(amount) {
@@ -1327,10 +1666,10 @@
             document.getElementById('currencyCode').value = code;
         }
 
-        // ── Budget helpers (localStorage) ────────────────────────────────────
+        // ── Budget helpers (localStorage, profile-scoped) ────────────────────
         function getMonthlyBudget() {
             try {
-                const raw = localStorage.getItem('expenseMonthlyBudget');
+                const raw = localStorage.getItem(profileKey('expenseMonthlyBudget'));
                 if (raw !== null) {
                     const val = parseFloat(raw);
                     if (Number.isFinite(val) && val >= 0) return val;
@@ -1340,7 +1679,7 @@
         }
 
         function saveMonthlyBudget(amount) {
-            localStorage.setItem('expenseMonthlyBudget', String(amount));
+            localStorage.setItem(profileKey('expenseMonthlyBudget'), String(amount));
         }
 
         function updateBudgetUI() {
@@ -1369,9 +1708,9 @@
         }
 
         // ── IndexedDB open ───────────────────────────────────────────────────
-        function openDB() {
+        function openDB(dbName) {
             return new Promise((resolve, reject) => {
-                const request = indexedDB.open(DB_NAME, DB_VERSION);
+                const request = indexedDB.open(dbName || DB_NAME, DB_VERSION);
 
                 request.onupgradeneeded = (event) => {
                     const db = event.target.result;
@@ -1586,14 +1925,18 @@
         let filterTo = '';
 
         async function init() {
-            db = await openDB();
+            const currentProfileId = getCurrentProfileId();
+            const dbName = getDBNameForProfile(currentProfileId);
+            db = await openDB(dbName);
             await initializeDefaultCategories(db);
             await loadCategories(db);
             renderCategorySelect();
             renderFilterCategoryOptions();
             updateCurrencyUI();
             updateBudgetUI();
+            renderProfileBar();
             await renderExpenses();
+            await checkShareImport();
         }
 
         // ── Filter helpers ───────────────────────────────────────────────────
@@ -1993,6 +2336,8 @@
                 document.getElementById('customRangeModal').classList.add('open');
             } else if (range === 'json-all') {
                 await exportJSON();
+            } else if (range === 'share-link') {
+                await generateShareURL();
             } else {
                 await exportExpenses(range);
             }
@@ -2035,17 +2380,9 @@
                 const valid = [];
                 let skipped = 0;
                 for (const raw of data) {
-                    const amount = parseFloat(raw.amount);
-                    const item = typeof raw.item === 'string' ? raw.item.trim() : '';
-                    const timestamp = raw.timestamp;
-                    if (!item || !Number.isFinite(amount) || amount <= 0 || !Number.isFinite(timestamp) || !Number.isSafeInteger(timestamp)) { skipped++; continue; }
-                    const expense = { amount, item, timestamp };
-                    if (raw.category && typeof raw.category === 'string') expense.category = raw.category;
-                    if (raw.vacation === true) expense.vacation = true;
-                    if (typeof raw.latitude === 'number' && raw.latitude >= -90 && raw.latitude <= 90) expense.latitude = raw.latitude;
-                    if (typeof raw.longitude === 'number' && raw.longitude >= -180 && raw.longitude <= 180) expense.longitude = raw.longitude;
-                    if (typeof raw.accuracy === 'number') expense.accuracy = raw.accuracy;
-                    valid.push(expense);
+                    const expense = validateExpenseRaw(raw);
+                    if (expense) valid.push(expense);
+                    else skipped++;
                 }
                 await addExpensesBatchToDB(db, valid);
                 await renderExpenses();
@@ -2055,6 +2392,273 @@
                 showMessage('Failed to import: ' + (err.message || 'Invalid JSON file.'), 'error');
             }
         });
+
+        // ── Shared expense validation helper ─────────────────────────────────
+        function validateExpenseRaw(raw) {
+            const amount = parseFloat(raw.amount);
+            const item = typeof raw.item === 'string' ? raw.item.trim() : '';
+            const timestamp = raw.timestamp;
+            if (!item || !Number.isFinite(amount) || amount <= 0 || !Number.isFinite(timestamp) || !Number.isSafeInteger(timestamp)) return null;
+            const expense = { amount, item, timestamp };
+            if (raw.category && typeof raw.category === 'string') expense.category = raw.category;
+            if (raw.vacation === true) expense.vacation = true;
+            if (typeof raw.latitude === 'number' && raw.latitude >= -90 && raw.latitude <= 90) expense.latitude = raw.latitude;
+            if (typeof raw.longitude === 'number' && raw.longitude >= -180 && raw.longitude <= 180) expense.longitude = raw.longitude;
+            if (typeof raw.accuracy === 'number') expense.accuracy = raw.accuracy;
+            return expense;
+        }
+
+        // ── WebDAV helpers ────────────────────────────────────────────────────
+        function getWebDAVPasswordSessionKey() {
+            return `${WEBDAV_SETTINGS_KEY}:password`;
+        }
+
+        function getWebDAVSettings() {
+            let persisted = { url: '', username: '' };
+            try {
+                const raw = localStorage.getItem(WEBDAV_SETTINGS_KEY);
+                if (raw) {
+                    const obj = JSON.parse(raw);
+                    if (obj && typeof obj === 'object') {
+                        persisted = {
+                            url: typeof obj.url === 'string' ? obj.url : '',
+                            username: typeof obj.username === 'string' ? obj.username : ''
+                        };
+                        // Migrate old format that stored password in localStorage
+                        if (typeof obj.password === 'string' && obj.password) {
+                            try { sessionStorage.setItem(getWebDAVPasswordSessionKey(), obj.password); } catch (_) {}
+                            localStorage.setItem(WEBDAV_SETTINGS_KEY, JSON.stringify(persisted));
+                        }
+                    }
+                }
+            } catch (_) { /* ignore */ }
+            let password = '';
+            try {
+                password = sessionStorage.getItem(getWebDAVPasswordSessionKey()) || '';
+            } catch (_) { /* ignore */ }
+            return { url: persisted.url, username: persisted.username, password };
+        }
+
+        function saveWebDAVSettings(settings) {
+            const persisted = {
+                url: settings && typeof settings.url === 'string' ? settings.url : '',
+                username: settings && typeof settings.username === 'string' ? settings.username : ''
+            };
+            localStorage.setItem(WEBDAV_SETTINGS_KEY, JSON.stringify(persisted));
+            try {
+                const password = settings && typeof settings.password === 'string' ? settings.password : '';
+                if (password) {
+                    sessionStorage.setItem(getWebDAVPasswordSessionKey(), password);
+                } else {
+                    sessionStorage.removeItem(getWebDAVPasswordSessionKey());
+                }
+            } catch (_) { /* ignore */ }
+        }
+
+        function updateWebDAVUI() {
+            const s = getWebDAVSettings();
+            document.getElementById('webdavUrl').value = s.url || '';
+            document.getElementById('webdavUser').value = s.username || '';
+            document.getElementById('webdavPass').value = s.password || '';
+            document.getElementById('webdavStatus').textContent = '';
+        }
+
+        async function syncWebDAV() {
+            const settings = getWebDAVSettings();
+            const statusEl = document.getElementById('webdavStatus');
+            if (!settings.url) {
+                showMessage('Please configure and save a WebDAV URL first.', 'error');
+                return;
+            }
+            // Use a profile-scoped filename so different expense books sync to different remote files
+            const profileId = getCurrentProfileId();
+            const fileName = profileId === 'default' ? 'expenses_sync.json' : `expenses_${profileId}_sync.json`;
+            const fileUrl = settings.url.replace(/\/$/, '') + '/' + fileName;
+            const headers = {};
+            if (settings.username) {
+                const credentials = Array.from(
+                    new TextEncoder().encode(settings.username + ':' + (settings.password || '')),
+                    b => String.fromCharCode(b)
+                ).join('');
+                headers['Authorization'] = 'Basic ' + btoa(credentials);
+            }
+            statusEl.textContent = 'Syncing…';
+            try {
+                // 1. Fetch remote data
+                let remoteExpenses = [];
+                try {
+                    const resp = await fetch(fileUrl, { method: 'GET', headers });
+                    if (resp.ok) {
+                        const text = await resp.text();
+                        const data = JSON.parse(text);
+                        if (Array.isArray(data)) remoteExpenses = data;
+                    }
+                } catch (_) { /* first sync or network error — proceed with empty remote */ }
+
+                // 2. Merge: add remote expenses not already present locally (by timestamp+amount+item)
+                const local = await getAllExpenses(db);
+                // Identity key uses JSON.stringify to avoid collisions with items containing separator characters
+                const identityKey = e => JSON.stringify([e.timestamp, e.amount, e.item]);
+                const localKeys = new Set(local.map(identityKey));
+                const seenRemoteKeys = new Set();
+                const toAdd = remoteExpenses
+                    .map(r => validateExpenseRaw(r))
+                    .filter(e => {
+                        if (e === null) return false;
+                        const key = identityKey(e);
+                        if (localKeys.has(key) || seenRemoteKeys.has(key)) return false;
+                        seenRemoteKeys.add(key);
+                        return true;
+                    });
+                if (toAdd.length > 0) {
+                    await addExpensesBatchToDB(db, toAdd);
+                }
+
+                // 3. Upload merged data back to WebDAV
+                const merged = await getAllExpenses(db);
+                const putResp = await fetch(fileUrl, {
+                    method: 'PUT',
+                    headers: { ...headers, 'Content-Type': 'application/json' },
+                    body: JSON.stringify(merged),
+                });
+                if (!putResp.ok) throw new Error(`WebDAV PUT failed: ${putResp.status} ${putResp.statusText}`);
+
+                await renderExpenses();
+                const msg = toAdd.length > 0
+                    ? `Sync complete. Added ${toAdd.length} remote expense(s).`
+                    : 'Sync complete. No new expenses from remote.';
+                statusEl.textContent = msg;
+                showMessage(msg, 'success');
+            } catch (err) {
+                console.error('WebDAV sync error:', err);
+                const msg = 'Sync failed: ' + (err.message || 'Unknown error');
+                statusEl.textContent = msg;
+                showMessage(msg, 'error');
+            }
+        }
+
+        // ── Share URL (AES-GCM encrypted URL fragment) ───────────────────────
+        function toBase64Url(bytes) {
+            const uint8 = new Uint8Array(bytes);
+            const chunkSize = 0x8000;
+            let binary = '';
+            for (let i = 0; i < uint8.length; i += chunkSize) {
+                binary += String.fromCharCode.apply(String, uint8.subarray(i, i + chunkSize));
+            }
+            return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+        }
+
+        function fromBase64Url(str) {
+            str = str.replace(/-/g, '+').replace(/_/g, '/');
+            while (str.length % 4) str += '=';
+            return Uint8Array.from(atob(str), c => c.charCodeAt(0));
+        }
+
+        async function compressString(str) {
+            if (typeof CompressionStream === 'undefined') {
+                return new TextEncoder().encode(str);
+            }
+            const cs = new CompressionStream('deflate-raw');
+            const writer = cs.writable.getWriter();
+            writer.write(new TextEncoder().encode(str));
+            writer.close();
+            return new Uint8Array(await new Response(cs.readable).arrayBuffer());
+        }
+
+        async function decompressBytes(bytes, wasCompressed) {
+            if (!wasCompressed) {
+                return new TextDecoder().decode(bytes);
+            }
+            if (typeof DecompressionStream === 'undefined') {
+                throw new Error('This shared payload is compressed, but this browser does not support decompression.');
+            }
+            const ds = new DecompressionStream('deflate-raw');
+            const writer = ds.writable.getWriter();
+            writer.write(bytes);
+            writer.close();
+            return new Response(ds.readable).text();
+        }
+
+        async function buildShareToken(expenses) {
+            const json = JSON.stringify(expenses);
+            const compressed = await compressString(json);
+            const compressedFlag = typeof CompressionStream !== 'undefined' ? 1 : 0;
+            // Payload: 1-byte compression flag + (compressed) data
+            const payload = new Uint8Array(1 + compressed.length);
+            payload[0] = compressedFlag;
+            payload.set(compressed, 1);
+            const key = await crypto.subtle.generateKey({ name: 'AES-GCM', length: 256 }, true, ['encrypt', 'decrypt']);
+            const iv = crypto.getRandomValues(new Uint8Array(12));
+            const ciphertext = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, payload);
+            const rawKey = await crypto.subtle.exportKey('raw', key);
+            return toBase64Url(rawKey) + '.' + toBase64Url(iv) + '.' + toBase64Url(new Uint8Array(ciphertext));
+        }
+
+        async function parseShareToken(token) {
+            const parts = token.split('.');
+            if (parts.length !== 3) throw new Error('Invalid share link format.');
+            const rawKey = fromBase64Url(parts[0]);
+            const iv = fromBase64Url(parts[1]);
+            const ciphertext = fromBase64Url(parts[2]);
+            const key = await crypto.subtle.importKey('raw', rawKey, { name: 'AES-GCM' }, false, ['decrypt']);
+            const decrypted = new Uint8Array(await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, ciphertext));
+            const wasCompressed = decrypted[0] === 1;
+            const bodyBytes = decrypted.slice(1);
+            const json = await decompressBytes(bodyBytes, wasCompressed);
+            return JSON.parse(json);
+        }
+
+        async function generateShareURL() {
+            const allExpenses = await getAllExpenses(db);
+            if (allExpenses.length === 0) {
+                showMessage('No expenses to share.', 'error');
+                return;
+            }
+            if (allExpenses.length > SHARE_MAX_EXPENSES) {
+                showMessage(`Too many expenses to share (${allExpenses.length}). Maximum is ${SHARE_MAX_EXPENSES}.`, 'error');
+                return;
+            }
+            if (!window.crypto || !window.crypto.subtle) {
+                showMessage('Your browser does not support the Web Crypto API required for share links.', 'error');
+                return;
+            }
+            try {
+                const token = await buildShareToken(allExpenses);
+                const base = location.href.split('#')[0];
+                const url = base + '#share=v1.' + token;
+                document.getElementById('shareUrlOutput').value = url;
+                document.getElementById('shareModal').classList.add('open');
+            } catch (err) {
+                console.error('Share URL error:', err);
+                showMessage('Failed to generate share link: ' + (err.message || 'Unknown error'), 'error');
+            }
+        }
+
+        let pendingShareExpenses = null;
+
+        async function checkShareImport() {
+            const hash = location.hash;
+            if (!hash.startsWith('#share=v1.')) return;
+            const token = hash.slice('#share=v1.'.length);
+            if (!token) return;
+            if (!window.crypto || !window.crypto.subtle) return;
+            try {
+                const expenses = await parseShareToken(token);
+                if (!Array.isArray(expenses) || expenses.length === 0) return;
+                if (expenses.length > SHARE_MAX_EXPENSES) {
+                    history.replaceState(null, '', location.pathname + location.search);
+                    showMessage(`Share link contains too many expenses (${expenses.length}). Maximum supported is ${SHARE_MAX_EXPENSES}.`, 'error');
+                    return;
+                }
+                pendingShareExpenses = expenses;
+                document.getElementById('importShareInfo').textContent =
+                    `This link contains ${expenses.length} expense(s). Import them into the current expense book ("${getCurrentProfileName()}")?`;
+                document.getElementById('importShareModal').classList.add('open');
+            } catch (err) {
+                console.error('Share import parse error:', err);
+                // Silently ignore — unrelated hash fragments should not produce errors
+            }
+        }
 
         document.getElementById('cancelCustomRange').addEventListener('click', () => {
             document.getElementById('customRangeModal').classList.remove('open');
@@ -2447,8 +3051,10 @@
         // ── Settings modal ───────────────────────────────────────────────────
         document.getElementById('settingsBtn').addEventListener('click', () => {
             renderSettingsCategoryList();
+            renderProfileList();
             updateCurrencyUI();
             updateBudgetUI();
+            updateWebDAVUI();
             document.getElementById('settingsModal').classList.add('open');
         });
 
@@ -2643,6 +3249,151 @@
             console.error('Failed to initialize database:', err);
             document.getElementById('message').textContent = 'Could not open local database. Please check your browser settings.';
             document.getElementById('message').className = 'message error show';
+        });
+
+        // ── Profile bar ──────────────────────────────────────────────────────
+        document.getElementById('profileSelect').addEventListener('change', (e) => {
+            const newProfileId = e.target.value;
+            if (newProfileId === getCurrentProfileId()) return;
+            setCurrentProfileId(newProfileId);
+            location.reload();
+        });
+
+        document.getElementById('addProfileBtn').addEventListener('click', () => {
+            // Open settings and scroll to the Expense Books section
+            renderSettingsCategoryList();
+            renderProfileList();
+            updateCurrencyUI();
+            updateBudgetUI();
+            updateWebDAVUI();
+            document.getElementById('settingsModal').classList.add('open');
+            setTimeout(() => {
+                const input = document.getElementById('newProfileName');
+                if (input) { input.focus(); input.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
+            }, 100);
+        });
+
+        // ── Profile management (settings) ────────────────────────────────────
+        document.getElementById('profileList').addEventListener('click', (e) => {
+            const delBtn = e.target.closest('.profile-delete-btn');
+            if (!delBtn) return;
+            const id = delBtn.dataset.id;
+            if (!id || id === getCurrentProfileId()) return;
+            const profiles = getProfiles();
+            if (profiles.length <= 1) {
+                showMessage('Cannot delete the last expense book.', 'error');
+                return;
+            }
+            const profile = profiles.find(p => p.id === id);
+            const name = profile ? profile.name : id;
+            const updated = profiles.filter(p => p.id !== id);
+            saveProfiles(updated);
+            renderProfileList();
+            renderProfileBar();
+            showMessage(`Expense book "${name}" removed from list. Its data remains in your browser.`, 'success');
+        });
+
+        document.getElementById('createProfileBtn').addEventListener('click', () => {
+            const input = document.getElementById('newProfileName');
+            const name = input.value.trim();
+            if (!name) {
+                showMessage('Please enter a name for the new expense book.', 'error');
+                return;
+            }
+            const profiles = getProfiles();
+            if (profiles.some(p => p.name.toLowerCase() === name.toLowerCase())) {
+                showMessage(`An expense book named "${name}" already exists.`, 'error');
+                return;
+            }
+            const existingIds = new Set(profiles.map(p => p.id));
+            const id = generateProfileId(existingIds);
+            profiles.push({ name, id });
+            saveProfiles(profiles);
+            input.value = '';
+            setCurrentProfileId(id);
+            location.reload();
+        });
+
+        // ── WebDAV settings ──────────────────────────────────────────────────
+        document.getElementById('saveWebDAVBtn').addEventListener('click', () => {
+            const url = document.getElementById('webdavUrl').value.trim();
+            const username = document.getElementById('webdavUser').value.trim();
+            const password = document.getElementById('webdavPass').value;
+            saveWebDAVSettings({ url, username, password });
+            showMessage('WebDAV settings saved.', 'success');
+            document.getElementById('webdavStatus').textContent = '';
+        });
+
+        document.getElementById('syncWebDAVBtn').addEventListener('click', async () => {
+            const btn = document.getElementById('syncWebDAVBtn');
+            btn.disabled = true;
+            btn.textContent = '⟳ Syncing…';
+            try {
+                await syncWebDAV();
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '⟳ Sync Now';
+            }
+        });
+
+        // ── Share URL modal ───────────────────────────────────────────────────
+        document.getElementById('closeShareModalBtn').addEventListener('click', () => {
+            document.getElementById('shareModal').classList.remove('open');
+        });
+
+        document.getElementById('shareModal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('shareModal')) {
+                document.getElementById('shareModal').classList.remove('open');
+            }
+        });
+
+        document.getElementById('copyShareUrlBtn').addEventListener('click', () => {
+            const urlText = document.getElementById('shareUrlOutput').value;
+            if (!urlText) return;
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(urlText).then(() => {
+                    showMessage('Share link copied to clipboard!', 'success');
+                }).catch(() => {
+                    document.getElementById('shareUrlOutput').select();
+                    document.execCommand('copy');
+                    showMessage('Share link copied to clipboard!', 'success');
+                });
+            } else {
+                // Legacy fallback for browsers without clipboard API
+                document.getElementById('shareUrlOutput').select();
+                document.execCommand('copy');
+                showMessage('Share link copied to clipboard!', 'success');
+            }
+        });
+
+        // ── Import share modal ────────────────────────────────────────────────
+        document.getElementById('cancelImportShareBtn').addEventListener('click', () => {
+            document.getElementById('importShareModal').classList.remove('open');
+            pendingShareExpenses = null;
+            history.replaceState(null, '', location.pathname + location.search);
+        });
+
+        document.getElementById('confirmImportShareBtn').addEventListener('click', async () => {
+            document.getElementById('importShareModal').classList.remove('open');
+            const expenses = pendingShareExpenses;
+            pendingShareExpenses = null;
+            history.replaceState(null, '', location.pathname + location.search);
+            if (!expenses || !Array.isArray(expenses)) return;
+            try {
+                const valid = [];
+                let skipped = 0;
+                for (const raw of expenses) {
+                    const e = validateExpenseRaw(raw);
+                    if (e) valid.push(e);
+                    else skipped++;
+                }
+                await addExpensesBatchToDB(db, valid);
+                await renderExpenses();
+                showMessage(`Imported ${valid.length} expense(s) from share link${skipped ? `, skipped ${skipped} invalid` : ''}.`, 'success');
+            } catch (err) {
+                console.error('Share import error:', err);
+                showMessage('Failed to import: ' + (err.message || 'Unknown error'), 'error');
+            }
         });
 
         // ── Service Worker ───────────────────────────────────────────────────
