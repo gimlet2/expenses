@@ -1483,10 +1483,14 @@
         const SHARE_MAX_EXPENSES = 500;
 
         // ── Profile helpers ──────────────────────────────────────────────────
-        function generateProfileId() {
-            const arr = new Uint8Array(6);
-            crypto.getRandomValues(arr);
-            return Array.from(arr, b => b.toString(16).padStart(2, '0')).join('');
+        function generateProfileId(existingIds) {
+            let id;
+            do {
+                const arr = new Uint8Array(6);
+                crypto.getRandomValues(arr);
+                id = Array.from(arr, b => b.toString(16).padStart(2, '0')).join('');
+            } while (existingIds && existingIds.has(id));
+            return id;
         }
 
         function getProfiles() {
@@ -1497,13 +1501,18 @@
                     if (Array.isArray(arr) && arr.length > 0) {
                         // Migrate old string format (v1) to {name, id} objects
                         let needsSave = false;
-                        const migrated = arr.map(p => {
+                        const seenIds = new Set();
+                        const migrated = arr.map((p, idx) => {
                             if (typeof p === 'string') {
                                 needsSave = true;
-                                // Use old sanitized name as id for backward-compat with existing DBs
-                                const id = p === 'Default' ? 'default' : p.replace(/[^a-zA-Z0-9_-]/g, '_') || 'book';
+                                // Use old sanitized name as id for backward-compat with existing DBs;
+                                // append index if the sanitized name is empty or already taken
+                                let id = p === 'Default' ? 'default' : p.replace(/[^a-zA-Z0-9_-]/g, '_');
+                                if (!id || seenIds.has(id)) id = 'book_' + idx;
+                                seenIds.add(id);
                                 return { name: p, id };
                             }
+                            if (p && typeof p.id === 'string') seenIds.add(p.id);
                             return p;
                         }).filter(p => p && typeof p.name === 'string' && p.name.trim() && typeof p.id === 'string');
                         if (needsSave && migrated.length > 0) saveProfiles(migrated);
@@ -2534,7 +2543,7 @@
             const chunkSize = 0x8000;
             let binary = '';
             for (let i = 0; i < uint8.length; i += chunkSize) {
-                binary += String.fromCharCode.apply(null, uint8.subarray(i, i + chunkSize));
+                binary += String.fromCharCode.apply(String, uint8.subarray(i, i + chunkSize));
             }
             return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
         }
@@ -3296,7 +3305,8 @@
                 showMessage(`An expense book named "${name}" already exists.`, 'error');
                 return;
             }
-            const id = generateProfileId();
+            const existingIds = new Set(profiles.map(p => p.id));
+            const id = generateProfileId(existingIds);
             profiles.push({ name, id });
             saveProfiles(profiles);
             input.value = '';
