@@ -1213,11 +1213,292 @@
             outline: none;
             border-color: #667eea;
         }
+
+        /* ── Dark mode toggle button ─────────────────────────────────────────── */
+        .dark-mode-btn {
+            background: none;
+            border: none;
+            font-size: 1.3em;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 4px;
+            color: #667eea;
+            transition: background 0.2s;
+            line-height: 1;
+            position: absolute;
+            left: 0;
+        }
+
+        .dark-mode-btn:hover {
+            background: #f0f2ff;
+        }
+
+        /* ── Dark mode styles ────────────────────────────────────────────────── */
+        body.dark {
+            background: linear-gradient(135deg, #0f0f1a 0%, #1a0a2e 100%);
+        }
+
+        body.dark .container {
+            background: #1a1a2e;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+        }
+
+        body.dark h1 { color: #d0d0f0; }
+        body.dark .subtitle { color: #7878a0; }
+        body.dark label { color: #c0c0e0; }
+        body.dark .section-header h2 { color: #c0c0e0; }
+        body.dark .section-header { border-bottom-color: #2a2a50; }
+
+        body.dark input[type="number"],
+        body.dark input[type="text"],
+        body.dark input[type="date"],
+        body.dark input[type="password"],
+        body.dark select,
+        body.dark textarea {
+            background: #22223a;
+            border-color: #3a3a60;
+            color: #e0e0f0;
+        }
+
+        body.dark input[type="number"]:focus,
+        body.dark input[type="text"]:focus,
+        body.dark input[type="date"]:focus,
+        body.dark input[type="password"]:focus,
+        body.dark select:focus { border-color: #8a9ef0; }
+
+        body.dark .btn-secondary { background: #3a3a5e; color: #d0d0f0; }
+        body.dark .btn-secondary:hover { background: #4a4a70; }
+        body.dark .btn-import { background: #2a2a4e; color: #b0b0d0; }
+        body.dark .btn-import:hover { background: #3a3a60; }
+
+        body.dark .edit-banner {
+            background: #2e2810;
+            border-color: #c89020;
+            color: #c8a040;
+        }
+
+        body.dark .monthly-summary-card { background: #22223a; border-color: #3a3a60; }
+        body.dark .monthly-summary-card .summary-label { color: #8080a8; }
+
+        body.dark .expense-item { background: #22223a; }
+        body.dark .expense-item:nth-child(even) { background: #1e1e38; }
+        body.dark .expense-item.vacation { background: #2a2010; border-left-color: #f6a623; }
+        body.dark .expense-item.vacation:nth-child(even) { background: #261e0e; }
+        body.dark .expense-item-name { color: #e0e0f0; }
+        body.dark .expense-item-date,
+        body.dark .expense-item-location { color: #7878a0; }
+        body.dark .expense-item-location a { color: #8a9ef0; }
+        body.dark .expense-category { color: #8a9ef0; }
+        body.dark .expense-amount { color: #8a9ef0; }
+        body.dark .expense-vacation-badge { color: #c89030; }
+        body.dark .no-expenses { color: #6060a0; }
+
+        body.dark .view-tabs { border-bottom-color: #2a2a50; }
+        body.dark .view-tab { color: #7070a0; }
+        body.dark .view-tab:hover { color: #8a9ef0; }
+        body.dark .view-tab.active { color: #8a9ef0; border-bottom-color: #8a9ef0; }
+
+        body.dark .filter-toolbar { background: #1e1e38; }
+        body.dark .filter-toolbar select,
+        body.dark .filter-toolbar input[type="date"] { background: #22223a; border-color: #3a3a60; color: #e0e0f0; }
+        body.dark .filter-vacation-label { color: #a0a0c0; }
+        body.dark .filter-date-group { color: #7070a0; }
+        body.dark .btn-clear-filters { background: #2a2a4e; color: #a0a0c0; }
+        body.dark .btn-clear-filters:hover { background: #3a3a60; }
+
+        body.dark .profile-bar select { background: #22223a; border-color: #3a3a60; color: #e0e0f0; }
+        body.dark .btn-add-profile { border-color: #8a9ef0; color: #8a9ef0; }
+        body.dark .btn-add-profile:hover { background: #22223a; }
+
+        body.dark .settings-btn { color: #8a9ef0; }
+        body.dark .settings-btn:hover { background: #22223a; }
+        body.dark .dark-mode-btn { color: #ffd700; }
+        body.dark .dark-mode-btn:hover { background: #22223a; }
+
+        body.dark .export-dropdown-menu {
+            background: #1a1a2e;
+            border-color: #3a3a60;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+        }
+        body.dark .export-dropdown-menu button { color: #e0e0f0; border-bottom-color: #2a2a50; }
+        body.dark .export-dropdown-menu button:hover { background: #22223a; }
+
+        body.dark .modal { background: #1a1a2e; }
+        body.dark .modal h3 { color: #d0d0f0; }
+        body.dark .modal input[type="date"] { background: #22223a; border-color: #3a3a60; color: #e0e0f0; }
+        body.dark .share-url-box { background: #22223a; border-color: #3a3a60; color: #a0a0c0; }
+        body.dark .share-note { color: #6868a0; }
+        body.dark .webdav-input { background: #22223a; border-color: #3a3a60; color: #e0e0f0; }
+        body.dark .webdav-status { color: #7070a0; }
+
+        body.dark .settings-section h4 { color: #7070a0; border-bottom-color: #2a2a50; }
+        body.dark .settings-cat-item { border-bottom-color: #2a2a50; }
+        body.dark .settings-cat-label { color: #d0d0f0; }
+        body.dark .settings-cat-edit-row input[type="text"] { background: #22223a; border-color: #3a3a60; color: #e0e0f0; }
+        body.dark .add-category-row { border-top-color: #2a2a50; }
+        body.dark .currency-row input { background: #22223a; border-color: #3a3a60; color: #e0e0f0; }
+        body.dark .budget-bar { background: #2a2a50; }
+        body.dark .budget-label { color: #7070a0; }
+        body.dark .profile-list-item { border-bottom-color: #2a2a50; }
+        body.dark .profile-list-name { color: #d0d0f0; }
+        body.dark .add-profile-row { border-top-color: #2a2a50; }
+        body.dark .add-profile-row input[type="text"] { background: #22223a; border-color: #3a3a60; color: #e0e0f0; }
+        body.dark .budget-input-row input[type="number"] { background: #22223a; border-color: #3a3a60; color: #e0e0f0; }
+
+        body.dark .chart-card { background: #1e1e38; }
+        body.dark .chart-title { color: #7070a0; }
+        body.dark .chart-legend-item { color: #a0a0c0; }
+        body.dark .analytics-table th,
+        body.dark .analytics-table td { border-bottom-color: #2a2a50; color: #d0d0f0; }
+        body.dark .analytics-table thead th { background: #22223a; color: #a0a0c0; border-bottom-color: #3a3a6a; }
+        body.dark .analytics-table thead th:first-child { background: #22223a; }
+        body.dark .analytics-table td:first-child { background: #1a1a2e; }
+        body.dark .analytics-table tbody tr:hover td { background: #22223a; }
+        body.dark .analytics-table tbody tr:hover td:first-child { background: #22223a; }
+        body.dark .analytics-table .total-row td { background: #22223a; border-top-color: #3a3a6a; }
+        body.dark .analytics-table .total-row td:first-child { background: #22223a; }
+        body.dark .analytics-table .vacation-row td { background: #2a2010; color: #c89030; }
+        body.dark .analytics-table .vacation-row td:first-child { background: #2a2010; }
+        body.dark .analytics-table .col-total { border-left-color: #3a3a6a; }
+        body.dark .analytics-no-data { color: #6060a0; }
+        body.dark .optional-hint { color: #6060a0; }
+        body.dark .delete-confirm { color: #a0a0c0; }
+
+        /* ── Templates ───────────────────────────────────────────────────────── */
+        .template-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 4px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .template-item:last-child { border-bottom: none; }
+
+        .template-info { flex: 1; min-width: 0; }
+
+        .template-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: #333;
+            display: block;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .template-preview {
+            font-size: 11px;
+            color: #888;
+            display: block;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .template-actions { display: flex; gap: 4px; flex-shrink: 0; }
+
+        .save-template-row {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid #eee;
+            flex-wrap: wrap;
+        }
+
+        .save-template-row label {
+            font-size: 12px;
+            color: #888;
+            white-space: nowrap;
+            margin-bottom: 0;
+            font-weight: 400;
+        }
+
+        .save-template-row input[type="text"] {
+            flex: 1;
+            min-width: 100px;
+            padding: 6px 8px;
+            font-size: 13px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+        }
+
+        .save-template-row input[type="text"]:focus { outline: none; border-color: #667eea; }
+
+        body.dark .template-item { border-bottom-color: #2a2a50; }
+        body.dark .template-name { color: #d0d0f0; }
+        body.dark .template-preview { color: #7070a0; }
+        body.dark .save-template-row { border-top-color: #2a2a50; }
+        body.dark .save-template-row label { color: #7070a0; }
+        body.dark .save-template-row input[type="text"] { background: #22223a; border-color: #3a3a60; color: #e0e0f0; }
+
+        /* ── Keyboard shortcuts modal ────────────────────────────────────────── */
+        .shortcuts-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .shortcuts-table td {
+            padding: 6px 8px;
+            border-bottom: 1px solid #eee;
+            color: #555;
+        }
+
+        .shortcuts-table tr:last-child td { border-bottom: none; }
+
+        .shortcuts-table td:first-child {
+            width: 90px;
+            white-space: nowrap;
+        }
+
+        kbd {
+            background: #f0f0f0;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            padding: 2px 6px;
+            font-family: monospace;
+            font-size: 12px;
+            color: #333;
+        }
+
+        body.dark .shortcuts-table td { border-bottom-color: #2a2a50; color: #c0c0e0; }
+        body.dark kbd { background: #2a2a4e; border-color: #4a4a7e; color: #e0e0f0; }
+
+        /* ── Onboarding modal ────────────────────────────────────────────────── */
+        .onboarding-list {
+            list-style: none;
+            margin-bottom: 4px;
+        }
+
+        .onboarding-list li {
+            padding: 7px 0;
+            font-size: 14px;
+            color: #555;
+            border-bottom: 1px solid #f0f0f0;
+            line-height: 1.4;
+        }
+
+        .onboarding-list li:last-child { border-bottom: none; }
+
+        body.dark .onboarding-list li { color: #b0b0c8; border-bottom-color: #2a2a50; }
     </style>
 </head>
 <body>
+    <script>
+        (function() {
+            var s = localStorage.getItem('expenseDarkMode');
+            if (s === '1' || (s === null && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.body.classList.add('dark');
+            }
+        })();
+    </script>
     <div class="container">
         <div class="header-row">
+            <button class="dark-mode-btn" id="darkModeBtn" aria-label="Toggle dark mode" title="Toggle dark mode">🌙</button>
             <h1>💰 Expense Tracker</h1>
             <button class="settings-btn" id="settingsBtn" aria-label="Settings" title="Settings">⚙️</button>
         </div>
@@ -1269,6 +1550,7 @@
             <div class="form-actions">
                 <button type="submit" class="btn btn-primary" id="submitBtn">Add Expense</button>
                 <button type="button" class="btn btn-secondary" id="cancelEditBtn" style="display:none">Cancel</button>
+                <button type="button" class="btn btn-secondary" id="templatesBtn" title="Templates" aria-label="Open templates">📋</button>
             </div>
         </form>
 
@@ -1416,6 +1698,7 @@
                 <p class="share-note">Copy this link to import your expenses on another device. The encryption key lives only in the URL fragment — it is never sent to any server.</p>
                 <textarea class="share-url-box" id="shareUrlOutput" rows="5" readonly aria-label="Share URL"></textarea>
                 <div class="modal-actions">
+                    <button class="btn btn-export" id="nativeShareBtn" style="display:none">📤 Share</button>
                     <button class="btn btn-primary" id="copyShareUrlBtn">Copy Link</button>
                     <button class="btn btn-secondary" id="closeShareModalBtn">Close</button>
                 </div>
@@ -1429,6 +1712,55 @@
                 <div class="modal-actions">
                     <button class="btn btn-primary" id="confirmImportShareBtn">Import</button>
                     <button class="btn btn-secondary" id="cancelImportShareBtn">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-overlay" id="templatesModal">
+            <div class="modal">
+                <h3>📋 Templates</h3>
+                <div id="templatesList"></div>
+                <div class="save-template-row">
+                    <label for="templateName">Save form as:</label>
+                    <input type="text" id="templateName" placeholder="Template name" maxlength="30" aria-label="Template name">
+                    <button class="btn btn-primary btn-sm" id="saveTemplateBtn" style="width:auto;padding:6px 12px">Save</button>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn btn-secondary" id="closeTemplatesBtn">Close</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-overlay" id="keyboardShortcutsModal">
+            <div class="modal">
+                <h3>⌨️ Keyboard Shortcuts</h3>
+                <table class="shortcuts-table">
+                    <tr><td><kbd>N</kbd></td><td>Focus new expense form</td></tr>
+                    <tr><td><kbd>E</kbd></td><td>Switch to Expenses tab</td></tr>
+                    <tr><td><kbd>A</kbd></td><td>Switch to Analytics tab</td></tr>
+                    <tr><td><kbd>D</kbd></td><td>Toggle dark mode</td></tr>
+                    <tr><td><kbd>Esc</kbd></td><td>Close modal / Cancel edit</td></tr>
+                    <tr><td><kbd>?</kbd></td><td>Show this help</td></tr>
+                </table>
+                <div class="modal-actions">
+                    <button class="btn btn-secondary" id="closeShortcutsBtn">Close</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-overlay" id="onboardingModal">
+            <div class="modal">
+                <h3>👋 Welcome to Expense Tracker!</h3>
+                <ul class="onboarding-list">
+                    <li>💰 <strong>Add expenses</strong> using the form — amount, category, date &amp; location</li>
+                    <li>📊 <strong>Analytics tab</strong> shows charts and monthly category breakdowns</li>
+                    <li>📁 <strong>Multiple books</strong> keep personal and work expenses separate</li>
+                    <li>🔗 <strong>Share link</strong> to securely transfer expenses to another device</li>
+                    <li>☁️ <strong>WebDAV sync</strong> keeps data in sync across devices</li>
+                    <li>⌨️ Press <kbd>?</kbd> anytime to see keyboard shortcuts</li>
+                </ul>
+                <div class="modal-actions">
+                    <button class="btn btn-primary" id="onboardingDoneBtn">Got it, let's start! 🚀</button>
                 </div>
             </div>
         </div>
@@ -1481,6 +1813,10 @@
         const CURRENT_PROFILE_KEY = 'expenseCurrentProfile';
         const WEBDAV_SETTINGS_KEY = 'expenseWebDAV';
         const SHARE_MAX_EXPENSES = 500;
+
+        // Apply dark mode immediately so the button icon/label are correct from the start
+        // (getDarkModePreference and applyDarkMode are hoisted function declarations)
+        applyDarkMode(getDarkModePreference());
 
         // ── Profile helpers ──────────────────────────────────────────────────
         function generateProfileId(existingIds) {
@@ -1937,6 +2273,8 @@
             renderProfileBar();
             await renderExpenses();
             await checkShareImport();
+            applyDarkMode(getDarkModePreference());
+            checkOnboarding();
         }
 
         // ── Filter helpers ───────────────────────────────────────────────────
@@ -2627,6 +2965,8 @@
                 const base = location.href.split('#')[0];
                 const url = base + '#share=v1.' + token;
                 document.getElementById('shareUrlOutput').value = url;
+                // Show native share button only if Web Share API is available
+                document.getElementById('nativeShareBtn').style.display = navigator.share ? '' : 'none';
                 document.getElementById('shareModal').classList.add('open');
             } catch (err) {
                 console.error('Share URL error:', err);
@@ -3402,6 +3742,252 @@
                 console.warn('Service worker registration failed:', err);
             });
         }
+
+        // ── Dark mode ─────────────────────────────────────────────────────────
+        function getDarkModePreference() {
+            const stored = localStorage.getItem('expenseDarkMode');
+            if (stored === '1') return true;
+            if (stored === '0') return false;
+            return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        }
+
+        function applyDarkMode(dark) {
+            document.body.classList.toggle('dark', dark);
+            const btn = document.getElementById('darkModeBtn');
+            if (btn) {
+                btn.textContent = dark ? '☀️' : '🌙';
+                btn.title = dark ? 'Switch to light mode' : 'Switch to dark mode';
+                btn.setAttribute('aria-label', dark ? 'Switch to light mode' : 'Switch to dark mode');
+            }
+        }
+
+        function toggleDarkMode() {
+            const isDark = document.body.classList.contains('dark');
+            localStorage.setItem('expenseDarkMode', isDark ? '0' : '1');
+            applyDarkMode(!isDark);
+        }
+
+        document.getElementById('darkModeBtn').addEventListener('click', toggleDarkMode);
+
+        // Respond to OS-level changes when user hasn't set a preference
+        if (window.matchMedia) {
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+                if (localStorage.getItem('expenseDarkMode') === null) {
+                    applyDarkMode(e.matches);
+                }
+            });
+        }
+
+        // ── Keyboard shortcuts ────────────────────────────────────────────────
+        document.addEventListener('keydown', (e) => {
+            const tag = e.target.tagName;
+            if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+            if (e.ctrlKey || e.metaKey || e.altKey) return;
+
+            switch (e.key) {
+                case 'n':
+                case 'N':
+                    e.preventDefault();
+                    document.getElementById('amount').focus();
+                    document.getElementById('amount').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    break;
+                case 'e':
+                case 'E':
+                    e.preventDefault();
+                    document.getElementById('tabExpenses').click();
+                    break;
+                case 'a':
+                case 'A':
+                    e.preventDefault();
+                    document.getElementById('tabAnalytics').click();
+                    break;
+                case 'd':
+                case 'D':
+                    e.preventDefault();
+                    toggleDarkMode();
+                    break;
+                case '?':
+                    e.preventDefault();
+                    document.getElementById('keyboardShortcutsModal').classList.add('open');
+                    break;
+                case 'Escape':
+                    document.querySelectorAll('.modal-overlay.open').forEach(el => el.classList.remove('open'));
+                    if (editingId !== null) cancelEdit();
+                    break;
+            }
+        });
+
+        document.getElementById('closeShortcutsBtn').addEventListener('click', () => {
+            document.getElementById('keyboardShortcutsModal').classList.remove('open');
+        });
+
+        document.getElementById('keyboardShortcutsModal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('keyboardShortcutsModal')) {
+                document.getElementById('keyboardShortcutsModal').classList.remove('open');
+            }
+        });
+
+        // ── Native share button ───────────────────────────────────────────────
+        document.getElementById('nativeShareBtn').addEventListener('click', async () => {
+            const urlText = document.getElementById('shareUrlOutput').value;
+            if (!urlText || !navigator.share) return;
+            try {
+                await navigator.share({ title: 'Expense Tracker — My Expenses', url: urlText });
+                document.getElementById('shareModal').classList.remove('open');
+            } catch (err) {
+                if (err.name !== 'AbortError') {
+                    showMessage('Share failed: ' + err.message, 'error');
+                }
+            }
+        });
+
+        // ── Templates ─────────────────────────────────────────────────────────
+        function getTemplates() {
+            try {
+                const raw = localStorage.getItem(profileKey('expenseTemplates'));
+                if (raw) {
+                    const arr = JSON.parse(raw);
+                    if (Array.isArray(arr)) return arr;
+                }
+            } catch (_) { /* ignore */ }
+            return [];
+        }
+
+        function saveTemplates(templates) {
+            localStorage.setItem(profileKey('expenseTemplates'), JSON.stringify(templates));
+        }
+
+        function renderTemplatesList() {
+            const container = document.getElementById('templatesList');
+            const templates = getTemplates();
+            container.innerHTML = '';
+            if (templates.length === 0) {
+                container.innerHTML = '<p style="font-size:13px;color:#888;padding:8px 0">No templates yet. Fill the expense form and save it as a template.</p>';
+                return;
+            }
+            templates.forEach(t => {
+                const row = document.createElement('div');
+                row.className = 'template-item';
+                const info = document.createElement('div');
+                info.className = 'template-info';
+                const nameEl = document.createElement('span');
+                nameEl.className = 'template-name';
+                nameEl.textContent = t.name;
+                const previewEl = document.createElement('span');
+                previewEl.className = 'template-preview';
+                previewEl.textContent = `${t.item || '—'} — ${formatAmount(parseFloat(t.amount) || 0)}`;
+                info.appendChild(nameEl);
+                info.appendChild(previewEl);
+                const actions = document.createElement('div');
+                actions.className = 'template-actions';
+                const useBtn = document.createElement('button');
+                useBtn.className = 'btn btn-primary btn-sm template-use-btn';
+                useBtn.dataset.id = t.id;
+                useBtn.textContent = 'Use';
+                const delBtn = document.createElement('button');
+                delBtn.className = 'btn btn-danger btn-sm template-del-btn';
+                delBtn.dataset.id = t.id;
+                delBtn.setAttribute('aria-label', 'Delete template');
+                delBtn.textContent = '✕';
+                actions.appendChild(useBtn);
+                actions.appendChild(delBtn);
+                row.appendChild(info);
+                row.appendChild(actions);
+                container.appendChild(row);
+            });
+        }
+
+        function applyTemplate(template) {
+            document.getElementById('amount').value = template.amount || '';
+            document.getElementById('item').value = template.item || '';
+            document.getElementById('category').value = template.category || '';
+            document.getElementById('vacation').checked = !!template.vacation;
+            document.getElementById('expenseDate').value = '';
+            document.getElementById('captureLocation').checked = false;
+        }
+
+        document.getElementById('templatesBtn').addEventListener('click', () => {
+            renderTemplatesList();
+            document.getElementById('templatesModal').classList.add('open');
+        });
+
+        document.getElementById('closeTemplatesBtn').addEventListener('click', () => {
+            document.getElementById('templatesModal').classList.remove('open');
+        });
+
+        document.getElementById('templatesModal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('templatesModal')) {
+                document.getElementById('templatesModal').classList.remove('open');
+            }
+        });
+
+        document.getElementById('saveTemplateBtn').addEventListener('click', () => {
+            const name = document.getElementById('templateName').value.trim();
+            const amount = document.getElementById('amount').value;
+            const item = document.getElementById('item').value.trim();
+            if (!name) {
+                showMessage('Please enter a template name.', 'error');
+                return;
+            }
+            if (!item) {
+                showMessage('Please enter an item description before saving as a template.', 'error');
+                return;
+            }
+            const templates = getTemplates();
+            templates.push({
+                id: Date.now(),
+                name,
+                amount: amount || '',
+                item: item || '',
+                category: document.getElementById('category').value || '',
+                vacation: document.getElementById('vacation').checked
+            });
+            saveTemplates(templates);
+            document.getElementById('templateName').value = '';
+            renderTemplatesList();
+            showMessage(`Template "${name}" saved.`, 'success');
+        });
+
+        document.getElementById('templatesList').addEventListener('click', (e) => {
+            const useBtn = e.target.closest('.template-use-btn');
+            if (useBtn) {
+                const id = parseInt(useBtn.dataset.id, 10);
+                const templates = getTemplates();
+                const template = templates.find(t => t.id === id);
+                if (template) {
+                    applyTemplate(template);
+                    document.getElementById('templatesModal').classList.remove('open');
+                    document.getElementById('amount').focus();
+                }
+                return;
+            }
+            const delBtn = e.target.closest('.template-del-btn');
+            if (delBtn) {
+                const id = parseInt(delBtn.dataset.id, 10);
+                const updated = getTemplates().filter(t => t.id !== id);
+                saveTemplates(updated);
+                renderTemplatesList();
+            }
+        });
+
+        // ── Onboarding ────────────────────────────────────────────────────────
+        function checkOnboarding() {
+            if (!localStorage.getItem('expenseOnboardingDone')) {
+                document.getElementById('onboardingModal').classList.add('open');
+            }
+        }
+
+        document.getElementById('onboardingDoneBtn').addEventListener('click', () => {
+            localStorage.setItem('expenseOnboardingDone', '1');
+            document.getElementById('onboardingModal').classList.remove('open');
+        });
+
+        document.getElementById('onboardingModal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('onboardingModal')) {
+                localStorage.setItem('expenseOnboardingDone', '1');
+                document.getElementById('onboardingModal').classList.remove('open');
+            }
+        });
     </script>
 </body>
 </html>
