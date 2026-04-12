@@ -1757,7 +1757,7 @@
                     <li>📁 <strong>Multiple books</strong> keep personal and work expenses separate</li>
                     <li>🔗 <strong>Share link</strong> to securely transfer expenses to another device</li>
                     <li>☁️ <strong>WebDAV sync</strong> keeps data in sync across devices</li>
-                    <li>⌨️ Press <kbd>?</kbd> anytime to see keyboard shortcuts</li>
+                    <li>⌨️ Press <kbd aria-label="question mark key">?</kbd> anytime to see keyboard shortcuts</li>
                 </ul>
                 <div class="modal-actions">
                     <button class="btn btn-primary" id="onboardingDoneBtn">Got it, let's start! 🚀</button>
@@ -1813,6 +1813,10 @@
         const CURRENT_PROFILE_KEY = 'expenseCurrentProfile';
         const WEBDAV_SETTINGS_KEY = 'expenseWebDAV';
         const SHARE_MAX_EXPENSES = 500;
+
+        // Apply dark mode immediately so the button icon/label are correct from the start
+        // (getDarkModePreference and applyDarkMode are hoisted function declarations)
+        applyDarkMode(getDarkModePreference());
 
         // ── Profile helpers ──────────────────────────────────────────────────
         function generateProfileId(existingIds) {
@@ -3871,7 +3875,7 @@
                 nameEl.textContent = t.name;
                 const previewEl = document.createElement('span');
                 previewEl.className = 'template-preview';
-                previewEl.textContent = `${t.item || '—'} · ${formatAmount(parseFloat(t.amount) || 0)}`;
+                previewEl.textContent = `${t.item || '—'} — ${formatAmount(parseFloat(t.amount) || 0)}`;
                 info.appendChild(nameEl);
                 info.appendChild(previewEl);
                 const actions = document.createElement('div');
@@ -3925,8 +3929,8 @@
                 showMessage('Please enter a template name.', 'error');
                 return;
             }
-            if (!item && !amount) {
-                showMessage('Please fill in the form before saving as a template.', 'error');
+            if (!item) {
+                showMessage('Please enter an item description before saving as a template.', 'error');
                 return;
             }
             const templates = getTemplates();
