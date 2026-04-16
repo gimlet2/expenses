@@ -1427,6 +1427,13 @@
 
         .save-template-row input[type="text"]:focus { outline: none; border-color: #667eea; }
 
+        .templates-empty {
+            font-size: 13px;
+            color: #888;
+            padding: 8px 0;
+        }
+
+        body.dark .templates-empty { color: #6868a0; }
         body.dark .template-item { border-bottom-color: #2a2a50; }
         body.dark .template-name { color: #d0d0f0; }
         body.dark .template-preview { color: #7070a0; }
@@ -1490,10 +1497,12 @@
 <body>
     <script>
         (function() {
-            var s = localStorage.getItem('expenseDarkMode');
-            if (s === '1' || (s === null && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-                document.body.classList.add('dark');
-            }
+            try {
+                var s = localStorage.getItem('expenseDarkMode');
+                if (s === '1' || (s === null && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                    document.body.classList.add('dark');
+                }
+            } catch (_) { /* localStorage unavailable (e.g., Safari private mode) — skip dark init */ }
         })();
     </script>
     <div class="container">
@@ -3787,6 +3796,17 @@
 
         // ── Keyboard shortcuts ────────────────────────────────────────────────
         document.addEventListener('keydown', (e) => {
+            // Escape always works, even when focus is inside a form field
+            if (e.key === 'Escape' && !e.ctrlKey && !e.metaKey && !e.altKey) {
+                const openModals = Array.from(document.querySelectorAll('.modal-overlay.open'));
+                if (openModals.some(el => el.id === 'onboardingModal')) {
+                    localStorage.setItem('expenseOnboardingDone', '1');
+                }
+                openModals.forEach(el => el.classList.remove('open'));
+                if (editingId !== null) cancelEdit();
+                return;
+            }
+
             const tag = e.target.tagName;
             if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
             if (e.ctrlKey || e.metaKey || e.altKey) return;
@@ -3816,10 +3836,6 @@
                 case '?':
                     e.preventDefault();
                     document.getElementById('keyboardShortcutsModal').classList.add('open');
-                    break;
-                case 'Escape':
-                    document.querySelectorAll('.modal-overlay.open').forEach(el => el.classList.remove('open'));
-                    if (editingId !== null) cancelEdit();
                     break;
             }
         });
@@ -3869,7 +3885,10 @@
             const templates = getTemplates();
             container.innerHTML = '';
             if (templates.length === 0) {
-                container.innerHTML = '<p style="font-size:13px;color:#888;padding:8px 0">No templates yet. Fill the expense form and save it as a template.</p>';
+                const empty = document.createElement('p');
+                empty.className = 'templates-empty';
+                empty.textContent = 'No templates yet. Fill the expense form and save it as a template.';
+                container.appendChild(empty);
                 return;
             }
             templates.forEach(t => {
