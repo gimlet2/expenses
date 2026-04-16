@@ -3817,10 +3817,18 @@
                     e.preventDefault();
                     document.getElementById('keyboardShortcutsModal').classList.add('open');
                     break;
-                case 'Escape':
-                    document.querySelectorAll('.modal-overlay.open').forEach(el => el.classList.remove('open'));
+                case 'Escape': {
+                    const openModals = Array.from(document.querySelectorAll('.modal-overlay.open'));
+                    const dismissingExpenseOnboarding = openModals.some(el =>
+                        /onboarding/i.test(el.id) || /onboarding/i.test(el.className)
+                    );
+                    if (dismissingExpenseOnboarding) {
+                        localStorage.setItem('expenseOnboardingDone', 'true');
+                    }
+                    openModals.forEach(el => el.classList.remove('open'));
                     if (editingId !== null) cancelEdit();
                     break;
+                }
             }
         });
 
