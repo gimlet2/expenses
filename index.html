@@ -3771,11 +3771,18 @@
 
         // Respond to OS-level changes when user hasn't set a preference
         if (window.matchMedia) {
-            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+            const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+            const handleDarkModeChange = (e) => {
                 if (localStorage.getItem('expenseDarkMode') === null) {
                     applyDarkMode(e.matches);
                 }
-            });
+            };
+
+            if (typeof darkModeMediaQuery.addEventListener === 'function') {
+                darkModeMediaQuery.addEventListener('change', handleDarkModeChange);
+            } else if (typeof darkModeMediaQuery.addListener === 'function') {
+                darkModeMediaQuery.addListener(handleDarkModeChange);
+            }
         }
 
         // ── Keyboard shortcuts ────────────────────────────────────────────────
